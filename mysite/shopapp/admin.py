@@ -1,20 +1,49 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 from .models import Product, Order
 
 class OrderInline(admin.TabularInline):
     model = Product.orders.through
 
+@admin.action(description="Archived products")
+def mark_archived(modeladmin: admin.ModelAdmin, request: HttpRequest, querysert: QuerySet):
+    querysert.update(archived=True)
+
+
+@admin.action(description="Unarchived products")
+def mark_unarchived(modeladmin: admin.ModelAdmin, request: HttpRequest, querysert: QuerySet):
+    querysert.update(archived=False)
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    actions = [
+        mark_archived,
+        mark_unarchived,
+    ]
     inlines = [
         OrderInline,
     ]
     #list_display = "pk", "name", "description", "price", "discount"
-    list_display = "pk", "name", "description_short", "price", "discount"
+    list_display = "pk", "name", "description_short", "price", "discount", "archived"
     list_display_links = "pk", "name"
     ordering = "name", "pk"
     search_fields = "name", "description"
+    fieldsets = [
+        (None, {
+            "fields": ("name", "description"),
+        }),
+        ("Price options", {
+            "fields": ("price", "discount"),
+            "classes": ("wide", "collapse",),
+        }),
+        ("Extra opions",{
+            "fields": ("archived",),
+            "classes": ("collapse",),
+            "description": "Extra options. Field 'archived' is for soft delete",
+        })
+    ]
 
 
     def description_short(self, obj: Product) -> str:
