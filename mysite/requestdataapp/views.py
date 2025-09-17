@@ -12,3 +12,5 @@ def process_get_view(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "requestdataapp/request-query-params.html", context=context)
 
+def user_form(request: HttpRequest) -> HttpResponse:
+    return render(request, "requestdataapp/user-bio-form.html")
