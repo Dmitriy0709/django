@@ -1,0 +1,21 @@
+{% extends 'requestdataapp/base.html' %}
+
+{% block title %}
+    File upload
+{% endblock %}
+
+{% block body %}
+<h1>Upload file</h1>
+<form method="post" enctype="multipart/form-data" action="{% url 'requestdataapp:file-upload' %}">
+    {% csrf_token %}
+    <p>
+        <input type="file" name="myfile">
+    </p>
+    <button type="submit">Upload</button>
+</form>
+
+{% if saved_file_url %}
+    <p>Файл успешно загружен: <a href="{{ saved_file_url }}">{{ saved_file_url }}</a></p>
+{% endif %}
+
+{% endblock %}
