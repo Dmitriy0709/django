@@ -27,3 +27,7 @@ class CountRequestsMiddleware:
         self.responses_count += 1
         print("responses count", self.responses_count)
         return response
+
+    def process_exception(self, request: HttpRequest, exception: Exception):
+        self.exception_count += 1
+        print("got", self.exception_count, "exceptions so far")
