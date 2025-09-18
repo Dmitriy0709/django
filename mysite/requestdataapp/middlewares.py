@@ -1,4 +1,33 @@
-from django.http import HttpRequest
+import time
+from django.http import HttpRequest, JsonResponse
+
+
+class ThrottleMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.visits = {}
+        self.TIME_PERIOD = 2  # Минимальный интервал между запросами (в секундах)
+
+    def __call__(self, request):
+        # Получаем IP адрес пользователя
+        ip = request.META.get('REMOTE_ADDR') or request.META.get('HTTP_X_FORWARDED_FOR')
+        if not ip:
+            ip = 'unknown'
+
+        now = time.time()
+
+        # Проверяем последний визит с этого IP
+        last_visit = self.visits.get(ip)
+        if last_visit and (now - last_visit < self.TIME_PERIOD):
+            return JsonResponse({
+                'error': 'Слишком много запросов. Попробуйте позже.'
+            }, status=429)
+
+        # Сохраняем время текущего запроса
+        self.visits[ip] = now
+
+        response = self.get_response(request)
+        return response
 
 
 def setup_useragent_on_request_middleware(get_response):

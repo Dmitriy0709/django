@@ -1,6 +1,8 @@
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
+import os
+
 
 def process_get_view(request: HttpRequest) -> HttpResponse:
     a = request.GET.get("a", "")
@@ -13,8 +15,10 @@ def process_get_view(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "requestdataapp/request-query-params.html", context=context)
 
+
 def user_form(request: HttpRequest) -> HttpResponse:
     return render(request, "requestdataapp/user-bio-form.html")
+
 
 def handle_file_upload(request: HttpRequest) -> HttpResponse:
     saved_file_url = None
@@ -26,3 +30,30 @@ def handle_file_upload(request: HttpRequest) -> HttpResponse:
         print("saved file", filename)
 
     return render(request, "requestdataapp/file-upload.html", context={"saved_file_url": saved_file_url})
+
+
+# НОВАЯ ФУНКЦИЯ с ограничением размера файла
+def upload_file_with_limit(request: HttpRequest) -> HttpResponse:
+    MAX_FILE_SIZE = 1048576  # 1 MB в байтах
+
+    if request.method == "POST":
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return JsonResponse({'error': 'Файл не предоставлен'}, status=400)
+
+        # Проверка размера файла
+        if uploaded_file.size > MAX_FILE_SIZE:
+            return JsonResponse({'error': 'Размер файла превышает лимит в 1 МБ'}, status=400)
+
+        # Создаем папку media если её нет
+        if not os.path.exists('media'):
+            os.makedirs('media')
+
+        # Сохраняем файл
+        fs = FileSystemStorage(location='media/')
+        filename = fs.save(uploaded_file.name, uploaded_file)
+
+        return JsonResponse({'message': 'Файл успешно загружен', 'filename': filename})
+
+    # Показываем форму для загрузки
+    return render(request, "requestdataapp/upload-with-limit.html")

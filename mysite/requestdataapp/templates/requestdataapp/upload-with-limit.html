@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузка файла с ограничением</title>
+</head>
+<body>
+    <h1>Загрузка файла (макс. 1 МБ)</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Выберите файл:</label>
+        <input type="file" name="file" id="file" required>
+        <br><br>
+        <button type="submit">Загрузить файл</button>
+    </form>
+</body>
+</html>
