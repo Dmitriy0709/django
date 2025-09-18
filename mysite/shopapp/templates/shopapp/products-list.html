@@ -15,10 +15,11 @@
         <p>Discount: {% firstof product.discount 'no discount' %}</p>
     </div>
     {% endfor %}
-</div>>
-
+</div>
 {% else %}
 <h3>No products yet</h3>
 {% endif %}
+<div>
+    <a href="{% url 'shopapp:product_create' %}">Create a new product</a>
+</div>
 {% endblock %}
-
