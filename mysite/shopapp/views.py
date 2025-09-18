@@ -40,7 +40,8 @@ def create_product(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             #name = form.cleaned_data["name"]
             #price = form.cleaned_data["price"]
-            Product.objects.create(**form.cleaned_data)
+            #Product.objects.create(**form.cleaned_data)
+            form.save()
             url = reverse("shopapp:products_list")
             return redirect(url)
 
