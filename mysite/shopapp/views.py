@@ -36,8 +36,10 @@ def products_list(request:HttpRequest):
 
 def create_product(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        url = reverse("shopapp:products_list")
-        return redirect(url)
+        form = ProductForm(request.POST)
+        if form.is_valod():
+            url = reverse("shopapp:products_list")
+            return redirect(url)
 
     form = ProductForm
     context = {
