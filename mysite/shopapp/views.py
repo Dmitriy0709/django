@@ -41,7 +41,8 @@ def create_product(request: HttpRequest) -> HttpResponse:
             url = reverse("shopapp:products_list")
             return redirect(url)
 
-    form = ProductForm
+    else:
+        form = ProductForm
     context = {
         "form": form,
     }
