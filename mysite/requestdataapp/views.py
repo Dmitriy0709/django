@@ -2,7 +2,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 
-from .forms import UserBioForm
+from .forms import UserBioForm, UploadFileForm
 import os
 
 
@@ -27,14 +27,22 @@ def user_form(request: HttpRequest) -> HttpResponse:
 
 def handle_file_upload(request: HttpRequest) -> HttpResponse:
     saved_file_url = None
-    if request.method == "POST" and request.FILES.get("myfile"):
-        myfile = request.FILES["myfile"]
-        fs = FileSystemStorage()
-        filename = fs.save(myfile.name, myfile)
-        saved_file_url = fs.url(filename)
-        print("saved file", filename)
-
-    return render(request, "requestdataapp/file-upload.html", context={"saved_file_url": saved_file_url})
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            #myfile = request.FILES["myfile"]
+            myfile = form.cleaned_data["file"]
+            fs = FileSystemStorage()
+            filename = fs.save(myfile.name, myfile)
+            saved_file_url = fs.url(filename)
+            print("saved file", filename)
+    else:
+        form = UploadFileForm()
+    context = {
+        "form": form,
+        "saved_file_url": saved_file_url,
+    }
+    return render(request, "requestdataapp/file-upload.html", context=context)
 
 
 # НОВАЯ ФУНКЦИЯ с ограничением размера файла
