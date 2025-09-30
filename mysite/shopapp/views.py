@@ -3,8 +3,9 @@ from timeit import default_timer
 from django.contrib.auth.models import Group
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView
 
 from .forms import GroupForm
 from .forms import ProductForm, OrderForm
@@ -68,24 +69,30 @@ class ProductDetailsView(DetailView):
     #    return render(request, "shopapp/products-details.html", context=context)
 
 
-def create_product(request: HttpRequest) -> HttpResponse:
-    if request.method == "POST":
-        form = ProductForm(request.POST)
-        if form.is_valid():
-            #name = form.cleaned_data["name"]
-            #price = form.cleaned_data["price"]
-            #Product.objects.create(**form.cleaned_data)
-            form.save()
-            url = reverse("shopapp:products_list")
-            return redirect(url)
+class ProductCreateView(CreateView):
+    model = Product
+    fields = "name", "price", "description", "discount"
+    success_url = reverse_lazy("shopapp:products_list")
 
-    else:
-        form = ProductForm
-    context = {
-        "form": form,
-    }
 
-    return render(request, "shopapp/create-product.html", context=context)
+#def create_product(request: HttpRequest) -> HttpResponse:
+#    if request.method == "POST":
+#        form = ProductForm(request.POST)
+#        if form.is_valid():
+#            #name = form.cleaned_data["name"]
+#            #price = form.cleaned_data["price"]
+#            #Product.objects.create(**form.cleaned_data)
+#            form.save()
+#            url = reverse("shopapp:products_list")
+#            return redirect(url)
+
+#    else:
+#        form = ProductForm
+#    context = {
+#        "form": form,
+#    }
+
+#    return render(request, "shopapp/create-product.html", context=context)
 
 
 #def orders_list(request:HttpRequest):
@@ -111,7 +118,9 @@ class OrdersListView(ListView):
         Order.objects.select_related("user").prefetch_related("products")
     )
 
+
 class OrderDetailView(DetailView):
     queryset = (
         Order.objects.select_related("user").prefetch_related("products")
     )
+
