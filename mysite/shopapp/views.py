@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect, reverse
 from django.views import View
 
+from .forms import GroupForm
 from .forms import ProductForm, OrderForm
 from .models import Product, Order
 
@@ -22,12 +23,20 @@ class ShopIndexView(View):
         }
         return render(request, 'shopapp/shop-index.html', context=context)
 
-def groups_list(request: HttpRequest):
-    context = {
-        "groups": Group.objects.prefetch_related('permissions').all(),
-    }
-    return render(request, 'shopapp/groups-list.html', context=context)
+class GroupListView(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        context = {
+            "form": GroupForm(),
+            "groups": Group.objects.prefetch_related('permissions').all(),
+        }
+        return render(request, 'shopapp/groups-list.html', context=context)
 
+    def post(self, request: HttpRequest):
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+        return redirect(request.path)
 
 def products_list(request:HttpRequest):
     context = {
