@@ -4,9 +4,10 @@ from .views import (ShopIndexView,
                     GroupListView,
                     ProductDetailsView,
                     ProductsListView,
-                    orders_list,
+                    OrdersListView,
                     create_product,
                     create_order,
+                    OrderDetailView,
 )
 
 app_name = "shopapp"
@@ -17,6 +18,7 @@ urlpatterns = [
     path("products/", ProductsListView.as_view(), name="products_list"),
     path("products/<int:pk>/", ProductDetailsView.as_view(), name="product_details"),
     path("products/create/", create_product, name="product_create"),
-    path("orders/", orders_list, name="orders_list"),
+    path("orders/", OrdersListView.as_view(), name="orders_list"),
+    path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_details"),
     path("orders/create/", create_order, name="order_create"),
 ]

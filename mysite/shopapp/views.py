@@ -88,11 +88,11 @@ def create_product(request: HttpRequest) -> HttpResponse:
     return render(request, "shopapp/create-product.html", context=context)
 
 
-def orders_list(request:HttpRequest):
-    context = {
-        "orders": Order.objects.select_related("user").prefetch_related("products").all(),
-    }
-    return render(request,'shopapp/orders-list.html', context=context)
+#def orders_list(request:HttpRequest):
+#    context = {
+#        "orders": Order.objects.select_related("user").prefetch_related("products").all(),
+#    }
+#    return render(request,'shopapp/orders-list.html', context=context)
 
 
 def create_order(request: HttpRequest) -> HttpResponse:
@@ -104,3 +104,14 @@ def create_order(request: HttpRequest) -> HttpResponse:
     else:
         form = OrderForm()
     return render(request, "shopapp/create-order.html", {"form": form})
+
+
+class OrdersListView(ListView):
+    queryset = (
+        Order.objects.select_related("user").prefetch_related("products")
+    )
+
+class OrderDetailView(DetailView):
+    queryset = (
+        Order.objects.select_related("user").prefetch_related("products")
+    )
