@@ -1,24 +1,32 @@
 {% extends 'shopapp/base.html' %}
 
 {% block title %}
-    Product #{{ produck.pk }}
+    Product {{ product.name }} details
 {% endblock %}
 
 {% block body %}
-    <h1>Product <strong>{{ product.name }}</strong></h1>
+    <h1>Product Details</h1>
+
     <div>
-        <div>Description: <em>{{ product.description }}</em></div>
-        <div>Price: {{ product.price }}</div>
-        <div>Discount: {{ product.discount }}</div>
-        <div>Archived: {{ product.archived }}</div>
+        <h2>{{ product.name }}</h2>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Description:</strong> {{ product.description|default:"No description" }}</p>
+        <p><strong>Discount:</strong> {{ product.discount|default:"No discount" }}%</p>
+        <p><strong>Created:</strong> {{ product.created_at }}</p>
+        <p><strong>Status:</strong> {% if product.archived %}Archived{% else %}Active{% endif %}</p>
     </div>
+
     <div>
-        <a href="{% url 'shopapp:product_update' pk=product.pk %}">Update product</a>
+        <h3>Actions:</h3>
+        <p>
+            <a href="{% url 'shopapp:products_list' %}">← Back to Products List</a>
+        </p>
+        <p>
+            <a href="{% url 'shopapp:product_update' pk=product.pk %}">Update Product</a>
+        </p>
+        <p>
+            <a href="{% url 'shopapp:product_delete' pk=product.pk %}">Archive Product</a>
+        </p>
     </div>
-    <div>
-        <a href="{% url 'shopapp:product_delete' pk=product.pk %}">Archive product</a>
-    </div>
-    <div>
-        <a href="{% url 'shopapp:products_list' %}">Back to products list</a>
-    </div>
+
 {% endblock %}
