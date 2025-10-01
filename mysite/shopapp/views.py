@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from .forms import GroupForm
 from .forms import ProductForm, OrderForm
@@ -124,6 +124,10 @@ def create_order(request: HttpRequest) -> HttpResponse:
         form = OrderForm()
     return render(request, "shopapp/create-order.html", {"form": form})
 
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy("shopapp:product_list")
 
 class OrdersListView(ListView):
     queryset = (
