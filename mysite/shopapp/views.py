@@ -106,15 +106,15 @@ class OrderCreateView(CreateView):
 class OrderUpdateView(UpdateView):
     model = Order
     form_class = OrderForm
-    template_name = "shopapp/order-update-form.html"
+    template_name = "shopapp/order-update-form"
 
     def get_success_url(self):
         return reverse(
-            "shopapp:order_detail.html",
+            "shopapp:order_detail",
             kwargs={"pk": self.object.pk},
         )
 
 class OrderDeleteView(DeleteView):
     model = Order
-    template_name = "shopapp/order-confirm-delete.html"
+    template_name = "shopapp/order-confirm-delete"
     success_url = reverse_lazy("shopapp:order_list")

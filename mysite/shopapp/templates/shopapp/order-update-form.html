@@ -53,7 +53,7 @@ Update Order #{{ order.pk }}
 
     <div>
         <button type="submit">Update Order</button>
-        <a href="{% url 'shopapp:order_details' pk=order.pk %}">Cancel</a>
+        <a href="{% url 'shopapp:order_detail' pk=order.pk %}">Cancel</a>
     </div>
 </form>
 

@@ -48,7 +48,7 @@ Delete Order #{{ order.pk }}
         <button type="submit" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; cursor: pointer;">
             Yes, Delete Order
         </button>
-        <a href="{% url 'shopapp:order_details' pk=order.pk %}" style="margin-left: 10px; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none;">
+        <a href="{% url 'shopapp:order_detail' pk=order.pk %}" style="margin-left: 10px; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none;">
             Cancel
         </a>
     </div>
