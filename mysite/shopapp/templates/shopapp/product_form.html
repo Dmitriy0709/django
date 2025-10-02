@@ -1,60 +1,20 @@
 {% extends 'shopapp/base.html' %}
 
 {% block title %}
-Create Order
+    Create product
 {% endblock %}
 
 {% block body %}
-<h1>Create New Order</h1>
-
-<form method="post">
-    {% csrf_token %}
-
+    <h1>Create product</h1>
     <div>
-        <label for="{{ form.user.id_for_label }}">User:</label>
-        {{ form.user }}
-        {% if form.user.errors %}
-            <div style="color: red;">
-                {{ form.user.errors }}
-            </div>
-        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create</button>
+        </form>
     </div>
 
     <div>
-        <label for="{{ form.delivery_address.id_for_label }}">Delivery Address:</label>
-        {{ form.delivery_address }}
-        {% if form.delivery_address.errors %}
-            <div style="color: red;">
-                {{ form.delivery_address.errors }}
-            </div>
-        {% endif %}
+        <a href="{% url 'shopapp:products_list' %}">Back to products list</a>
     </div>
-
-    <div>
-        <label for="{{ form.promocode.id_for_label }}">Promocode:</label>
-        {{ form.promocode }}
-        {% if form.promocode.errors %}
-            <div style="color: red;">
-                {{ form.promocode.errors }}
-            </div>
-        {% endif %}
-    </div>
-
-    <div>
-        <label for="{{ form.products.id_for_label }}">Products:</label>
-        {{ form.products }}
-        {% if form.products.errors %}
-            <div style="color: red;">
-                {{ form.products.errors }}
-            </div>
-        {% endif %}
-        <small>Select one or more products for this order</small>
-    </div>
-
-    <div>
-        <button type="submit">Create Order</button>
-        <a href="{% url 'shopapp:orders_list' %}">Cancel</a>
-    </div>
-</form>
-
 {% endblock %}
