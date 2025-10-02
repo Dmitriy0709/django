@@ -1,35 +1,60 @@
 {% extends 'shopapp/base.html' %}
 
 {% block title %}
-    Orders list
+Orders List
 {% endblock %}
 
 {% block body %}
-<h1>Orders:</h1>
-{% if object_list %}
-<div>
-    {% for order in object_list %}
-    <div>
-        <p><a href="{% url 'shopapp:order_details' pk=order.pk %}">Details #{{ order.pk }}</a></p>
-        <p>Order by {% firstof order.user.first_name order.user.username %}</p>
-        <p>Promocode: <code>{{ order.promocode}}</code>></p>
-        <p>Deliviry address: {{ order.delivery_address}}</p>
-        <div>
-            Products in order:
+<h1>Orders</h1>
+
+{% if orders %}
+    {% for order in orders %}
+        <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px;">
+            <h3>
+                <a href="{% url 'shopapp:order_details' pk=order.pk %}">
+                    Order #{{ order.pk }}
+                </a>
+            </h3>
+
+            <p><strong>User:</strong>
+                {% if order.user.first_name %}
+                    {{ order.user.first_name }} {{ order.user.last_name }}
+                {% else %}
+                    {{ order.user.username }}
+                {% endif %}
+            </p>
+
+            <p><strong>Created:</strong> {{ order.created_at }}</p>
+
+            <p><strong>Delivery Address:</strong> {{ order.delivery_address|default:"Not specified" }}</p>
+
+            <p><strong>Promocode:</strong> {{ order.promocode|default:"None" }}</p>
+
+            <div>
+                <strong>Products:</strong>
+                {% if order.products.all %}
+                    <ul>
+                        {% for product in order.products.all %}
+                            <li>
+                                <a href="{% url 'shopapp:product_details' pk=product.pk %}">
+                                    {{ product.name }}
+                                </a>
+                                - ${{ product.price }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <em>No products in this order</em>
+                {% endif %}
+            </div>
         </div>
-        <ul>
-            {% for product in order.products.all %}
-            <li>{{ product.name }} for ${{ product.price }}</li>
-            {% endfor %}
-        </ul>
-    </div>
     {% endfor %}
-</div>
 {% else %}
-<h3>No orders yet</h3>
+    <h3>No orders yet</h3>
 {% endif %}
 
-<div>
-    <a href="{% url 'shopapp:product_create' %}">Create a new product</a>
-</div>
+<p>
+    <a href="{% url 'shopapp:order_create' %}">Create a new order</a>
+</p>
+
 {% endblock %}
