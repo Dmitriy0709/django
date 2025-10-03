@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'shopapp.apps.ShopappConfig',
-    'myauth.apps.MyauthConfig',
     'requestdataapp.apps.RequestdataappConfig',
+    'myauth.apps.MyauthConfig',
 ]
 
 MIDDLEWARE = [
