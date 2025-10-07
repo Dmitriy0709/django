@@ -7,5 +7,5 @@ app_name = "myauth"
 
 urlpatterns = [
     #path("login/", login_view, name="login"),
-    path("login/", LoginView.as_view(template_name="myauth/login.html"), name="login"),
+    path("login/", LoginView.as_view(template_name="myauth/login.html", redirect_authentecated_user=True), name="login"),
 ]
