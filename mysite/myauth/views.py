@@ -1,7 +1,8 @@
+from django.contrib.auth.views import LogoutView
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 
 def login_view(request: HttpRequest):
@@ -25,6 +26,9 @@ def logout_view(request: HttpRequest):
     logout(request)
     return redirect(reverse("myauth: login"))
 
+
+class MyLogoutView(LogoutView):
+    next_page = reverse_lazy("myauth: login")
 
 
 def set_cookie_view(request: HttpRequest) -> HttpResponse:
