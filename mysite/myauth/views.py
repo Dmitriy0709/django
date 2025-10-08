@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.urls import reverse
 
 
 def login_view(request: HttpRequest):
@@ -19,6 +20,12 @@ def login_view(request: HttpRequest):
         return redirect("/admin/")
 
     return render(request, "myauth/login.html", {"error": "Invalid login credentials"})
+
+def logout_view(request: HttpRequest):
+    logout(request)
+    return redirect(reverse("myauth: login"))
+
+
 
 def set_cookie_view(request: HttpRequest) -> HttpResponse:
     response = HttpResponse("Cookie set")
