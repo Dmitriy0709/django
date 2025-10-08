@@ -29,3 +29,12 @@ def set_cookie_view(request: HttpRequest) -> HttpResponse:
 def get_cookie_view(request: HttpRequest) -> HttpResponse:
     value = request.COOKIES.get("fizz", "dafault value")
     return HttpResponse(f"Cookie value: {value!r}")
+
+
+def set_session_view(request: HttpRequest) -> HttpResponse:
+    request.session["foobar"] = "spameggs"
+    return HttpResponse("Session set!")
+
+def get_session_view(request: HttpRequest) -> HttpResponse:
+    value = request.session.get("foobar", "default")
+    return HttpResponse(f"Session value: {value!r}")
