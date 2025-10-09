@@ -50,3 +50,4 @@ def get_session_view(request: HttpRequest) -> HttpResponse:
     value = request.session.get("foobar", "default")
     return HttpResponse(f"Session value: {value!r}")
 
+
