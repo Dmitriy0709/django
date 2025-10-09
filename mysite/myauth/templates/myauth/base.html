@@ -1,13 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}
-    {% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            MyAuth App
+        {% endblock %}
+    </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #007cba;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-{% block body %}
+    <div class="nav">
+        <strong>Навигация:</strong>
+        <a href="{% url 'myauth:login' %}">Вход</a>
+        <a href="{% url 'myauth:logout' %}">Выход</a>
+        <a href="{% url 'myauth:cookie-set' %}">Установить Cookie</a>
+        <a href="{% url 'myauth:cookie-get' %}">Получить Cookie</a>
+        <a href="{% url 'myauth:session-set' %}">Установить Session</a>
+        <a href="{% url 'myauth:session-get' %}">Получить Session</a>
+        <a href="{% url 'admin:index' %}">Админ</a>
+    </div>
 
-{% endblock %}
+    {% block body %}
+    {% endblock %}
 </body>
 </html>

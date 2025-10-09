@@ -22,13 +22,13 @@ def login_view(request: HttpRequest):
 
     return render(request, "myauth/login.html", {"error": "Invalid login credentials"})
 
-def logout_view(request: HttpRequest):
-    logout(request)
-    return redirect(reverse("myauth: login"))
+#def logout_view(request: HttpRequest):
+#    logout(request)
+#    return redirect(reverse("myauth: login"))
 
 
 class MyLogoutView(LogoutView):
-    next_page = reverse_lazy("myauth: login")
+    next_page = reverse_lazy("myauth:login")
 
 
 def set_cookie_view(request: HttpRequest) -> HttpResponse:

@@ -5,10 +5,20 @@
 {% endblock %}
 
 {% block body %}
+    <h2>Enter the system</h2>
+
+    {% if form.errors %}
+        <div style="color: red;">
+            {{ form.errors }}
+        </div>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
 
         {{ form.as_p }}
         <button type="submit">Login</button>
     </form>
+
+    <p><a href="{% url 'admin:index' %}">In admin panel</a></p>
 {% endblock %}
