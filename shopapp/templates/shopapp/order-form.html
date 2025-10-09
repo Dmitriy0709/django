@@ -1,0 +1,60 @@
+{% extends 'shopapp/base.html' %}
+
+{% block title %}
+Create Order
+{% endblock %}
+
+{% block body %}
+<h1>Create New Order</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div>
+        <label for="{{ form.user.id_for_label }}">User:</label>
+        {{ form.user }}
+        {% if form.user.errors %}
+            <div style="color: red;">
+                {{ form.user.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="{{ form.delivery_address.id_for_label }}">Delivery Address:</label>
+        {{ form.delivery_address }}
+        {% if form.delivery_address.errors %}
+            <div style="color: red;">
+                {{ form.delivery_address.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="{{ form.promocode.id_for_label }}">Promocode:</label>
+        {{ form.promocode }}
+        {% if form.promocode.errors %}
+            <div style="color: red;">
+                {{ form.promocode.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="{{ form.products.id_for_label }}">Products:</label>
+        {{ form.products }}
+        {% if form.products.errors %}
+            <div style="color: red;">
+                {{ form.products.errors }}
+            </div>
+        {% endif %}
+        <small>Select one or more products for this order</small>
+    </div>
+
+    <div>
+        <button type="submit">Create Order</button>
+        <a href="{% url 'shopapp:orders_list' %}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}

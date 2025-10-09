@@ -1,0 +1,66 @@
+{% extends 'shopapp/base.html' %}
+
+{% block title %}
+Order #{{ order.pk }} Details
+{% endblock %}
+
+{% block body %}
+<h1>Order #{{ order.pk }} Details</h1>
+
+<div>
+    <h2>Order Information</h2>
+
+    <p><strong>User:</strong>
+        {% if order.user.first_name %}
+            {{ order.user.first_name }} {{ order.user.last_name }}
+        {% else %}
+            {{ order.user.username }}
+        {% endif %}
+    </p>
+
+    <p><strong>Created:</strong> {{ order.created_at }}</p>
+
+    <p><strong>Delivery Address:</strong> {{ order.delivery_address|default:"Not specified" }}</p>
+
+    <p><strong>Promocode:</strong> {{ order.promocode|default:"None" }}</p>
+</div>
+
+<div>
+    <h3>Products in this order:</h3>
+    {% if order.products.all %}
+        <ul>
+            {% for product in order.products.all %}
+                <li>
+                    <a href="{% url 'shopapp:product_details' pk=product.pk %}">
+                        {{ product.name }}
+                    </a>
+                    - ${{ product.price }}
+                    {% if product.discount %}
+                        ({{ product.discount }}% discount)
+                    {% endif %}
+                    <br>
+                    <small>{{ product.description|truncatewords:10 }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <p><strong>Total products:</strong> {{ order.products.count }}</p>
+    {% else %}
+        <p><em>No products in this order</em></p>
+    {% endif %}
+</div>
+
+<div>
+    <h3>Actions:</h3>
+    <p>
+        <a href="{% url 'shopapp:orders_list' %}">← Back to Orders List</a>
+    </p>
+    <p>
+        <a href="{% url 'shopapp:order_update' pk=order.pk %}">Update Order</a>
+    </p>
+    <p>
+        <a href="{% url 'shopapp:order_delete' pk=order.pk %}">Delete Order</a>
+    </p>
+</div>
+
+{% endblock %}
