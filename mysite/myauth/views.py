@@ -3,7 +3,11 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse, reverse_lazy
+from django.views.generic import TemplateView
 
+
+class AboutMeView(TemplateView):
+    template_name = "myauth/about-me.html"
 
 def login_view(request: HttpRequest):
     if request.method == "GET":
