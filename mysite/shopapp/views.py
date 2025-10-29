@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from .forms import GroupForm
 from .forms import ProductForm, OrderForm
 from .models import Product, Order
@@ -80,7 +80,7 @@ class ProductDeleteView(DeleteView):
         self.object.save()
         return HttpResponseRedirect(success_url)
 
-class OrdersListView(ListView):
+class OrdersListView(LoginRequiredMixin, ListView):
     template_name = "shopapp/order_list.html"
     context_object_name = "orders"
     queryset = (
