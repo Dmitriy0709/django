@@ -88,7 +88,8 @@ class OrdersListView(LoginRequiredMixin, ListView):
     )
 
 
-class OrderDetailView(DetailView):
+class OrderDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = "view_order"
     template_name = "shopapp/order_detail.html"
     context_object_name = "order"
     queryset = (
