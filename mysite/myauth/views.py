@@ -1,80 +1,162 @@
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.views import LogoutView
-from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.urls import reverse, reverse_lazy
-from django.views.generic import TemplateView, CreateView
+from django.views import View
+from django.views.generic import CreateView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 from .models import Profile
-
-
-class AboutMeView(TemplateView):
-    template_name = "myauth/about-me.html"
+from .forms import RegisterForm, ProfileForm, UserUpdateForm
 
 
 class RegisterView(CreateView):
-    form_class = UserCreationForm
-    template_name = "myauth/register.html"
-    success_url = reverse_lazy("myauth:about-me")
+    """
+    View для регистрации нового пользователя.
+    При успешной регистрации автоматически создается профиль пользователя.
+    """
+    form_class = RegisterForm
+    template_name = 'myauth/register.html'
+    success_url = reverse_lazy('myauth:login')
 
     def form_valid(self, form):
+        """
+        Переопределенный метод form_valid.
+        После сохранения формы пользователь перенаправляется на страницу входа.
+        Профиль создается автоматически в методе save формы.
+        """
         response = super().form_valid(form)
-        Profile.objects.create(user=self.object)
-        username = form.cleaned_data.get("username")
-        password = form.cleaned_data.get("password1")
-        user = authenticate(self.request, username=username, password=password)
-        login(request=self.request, user=user)
-
         return response
 
 
+class AboutMeView(LoginRequiredMixin, DetailView):
+    """
+    View для отображения профиля пользователя (страница "О мне").
+    Требует аутентификации пользователя.
+    """
+    model = Profile
+    template_name = 'myauth/about_me.html'
+    context_object_name = 'profile'
 
-def login_view(request: HttpRequest):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            return redirect('/admin/')
+    def get_object(self, queryset=None):
+        """
+        Получить профиль текущего пользователя.
+        """
+        return self.request.user.profile
 
-        return render(request, 'myauth/login.html')
+    def get_context_data(self, **kwargs):
+        """
+        Добавить дополнительный контекст для шаблона.
+        """
+        context = super().get_context_data(**kwargs)
+        if self.request.method == 'POST':
+            context['profile_form'] = ProfileForm(
+                self.request.POST,
+                self.request.FILES,
+                instance=self.object
+            )
+            context['user_form'] = UserUpdateForm(
+                self.request.POST,
+                instance=self.request.user
+            )
+        else:
+            context['profile_form'] = ProfileForm(instance=self.object)
+            context['user_form'] = UserUpdateForm(instance=self.request.user)
+        return context
 
-    username = request.POST["username"]
-    password = request.POST["password"]
+    def post(self, request, *args, **kwargs):
+        """
+        Обработка POST запроса для обновления профиля.
+        """
+        self.object = self.get_object()
+        profile_form = ProfileForm(
+            request.POST,
+            request.FILES,
+            instance=self.object
+        )
+        user_form = UserUpdateForm(request.POST, instance=request.user)
 
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        return redirect("/admin/")
+        if profile_form.is_valid() and user_form.is_valid():
+            profile_form.save()
+            user_form.save()
+            return redirect('myauth:about-me')
 
-    return render(request, "myauth/login.html", {"error": "Invalid login credentials"})
-
-#def logout_view(request: HttpRequest):
-#    logout(request)
-#    return redirect(reverse("myauth: login"))
-
-
-class MyLogoutView(LogoutView):
-    next_page = reverse_lazy("myauth:login")
+        context = self.get_context_data()
+        context['profile_form'] = profile_form
+        context['user_form'] = user_form
+        return self.render_to_response(context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def set_cookie_view(request: HttpRequest) -> HttpResponse:
-    response = HttpResponse("Cookie set")
-    response.set_cookie("fizz", "buzz", max_age=3600)
+# Cookie views
+def get_cookie_view(request):
+    """
+    View для получения значения cookie.
+    Получает cookie 'item_count' или возвращает значение по умолчанию.
+    """
+    cookies = request.COOKIES
+    items_count = cookies.get('item_count', 'not set')
+
+    return render(
+        request,
+        'myauth/cookie_view.html',
+        context={
+            'item_count': items_count,
+            'view_name': 'get_cookie_view'
+        }
+    )
+
+
+def set_cookie_view(request):
+    """
+    View для установки cookie.
+    Устанавливает cookie 'item_count' с номером товара.
+    """
+    response = render(
+        request,
+        'myauth/cookie_view.html',
+        context={'view_name': 'set_cookie_view'}
+    )
+
+    item_count = request.GET.get('items_count', 1)
+    max_age = 60 * 60 * 24 * 7  # 7 дней
+
+    response.set_cookie(
+        'item_count',
+        value=item_count,
+        max_age=max_age,
+        httponly=True
+    )
+
     return response
 
 
-def get_cookie_view(request: HttpRequest) -> HttpResponse:
-    value = request.COOKIES.get("fizz", "dafault value")
-    return HttpResponse(f"Cookie value: {value!r}")
+# Session views
+def get_session_view(request):
+    """
+    View для получения значения сессии.
+    Получает значение 'item_count' из сессии или возвращает значение по умолчанию.
+    """
+    items_count = request.session.get('item_count', 'not set')
+
+    return render(
+        request,
+        'myauth/session_view.html',
+        context={
+            'item_count': items_count,
+            'view_name': 'get_session_view'
+        }
+    )
 
 
-@permission_required("myauth.view_profile", raise_exception=True)
-def set_session_view(request: HttpRequest) -> HttpResponse:
-    request.session["foobar"] = "spameggs"
-    return HttpResponse("Session set!")
+def set_session_view(request):
+    """
+    View для установки значения сессии.
+    Устанавливает значение 'item_count' в сессию.
+    """
+    items_count = request.GET.get('items_count', 1)
+    request.session['item_count'] = items_count
 
-@login_required
-def get_session_view(request: HttpRequest) -> HttpResponse:
-    value = request.session.get("foobar", "default")
-    return HttpResponse(f"Session value: {value!r}")
-
+    return render(
+        request,
+        'myauth/session_view.html',
+        context={'view_name': 'set_session_view'}
+    )
