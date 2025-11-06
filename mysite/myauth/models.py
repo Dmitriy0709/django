@@ -7,10 +7,11 @@ from django.dispatch import receiver
 class Profile(models.Model):
     """
     Расширенная модель профиля пользователя
-    Предоставляет дополнительные поля для персонализации пользователя
-    Связь: один к одному с моделью User
+    Предоставляет дополнительные поля для персонализации
+    Связь один-к-одному с моделью User
     """
     # Связь с пользователем (один к одному)
+    # При удалении пользователя удалится и профиль (CASCADE)
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -18,43 +19,43 @@ class Profile(models.Model):
         verbose_name='Пользователь'
     )
 
-    # Аватар пользователя
-    avatar = models.ImageField(
-        upload_to='avatars/',
-        null=True,
-        blank=True,
-        verbose_name='Аватар пользователя'
-    )
-
-    # Биография
+    # Биография пользователя
     bio = models.TextField(
         max_length=500,
         blank=True,
         verbose_name='Биография'
     )
 
-    # Персональный сайт
-    website = models.URLField(
-        blank=True,
+    # Аватар (фотография профиля)
+    avatar = models.ImageField(
+        upload_to='avatars/',
         null=True,
-        verbose_name='Персональный веб-сайт'
-    )
-
-    # Телефон
-    phone = models.CharField(
-        max_length=20,
         blank=True,
-        verbose_name='Номер телефона'
+        verbose_name='Аватар'
     )
 
-    # Дата рождения
+    # Дата рождения пользователя
     birth_date = models.DateField(
         null=True,
         blank=True,
         verbose_name='Дата рождения'
     )
 
-    # Местоположение
+    # Персональный веб-сайт
+    website = models.URLField(
+        blank=True,
+        null=True,
+        verbose_name='Веб-сайт'
+    )
+
+    # Телефон пользователя
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name='Телефон'
+    )
+
+    # Местоположение пользователя
     location = models.CharField(
         max_length=100,
         blank=True,
@@ -67,7 +68,7 @@ class Profile(models.Model):
         verbose_name='Создано'
     )
 
-    # Дата последнего обновления
+    # Дата последнего обновления профиля
     updated_at = models.DateTimeField(
         auto_now=True,
         verbose_name='Обновлено'
@@ -81,20 +82,22 @@ class Profile(models.Model):
         return f'Профиль пользователя {self.user.username}'
 
 
-# Сигнал для автоматического создания профиля при создании пользователя
+# ========== СИГНАЛЫ ДЛЯ АВТОМАТИЧЕСКОГО СОЗДАНИЯ ПРОФИЛЯ ==========
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """
-    Обработчик сигнала для создания профиля при регистрации нового пользователя
+    Сигнал для автоматического создания профиля при создании пользователя
+    Вызывается при регистрации нового пользователя
     """
     if created:
         Profile.objects.create(user=instance)
 
 
-# Сигнал для сохранения профиля при сохранении пользователя
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """
-    Обработчик сигнала для сохранения профиля при обновлении пользователя
+    Сигнал для сохранения профиля при сохранении пользователя
+    Гарантирует синхронизацию профиля с пользователем
     """
     instance.profile.save()

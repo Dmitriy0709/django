@@ -8,6 +8,7 @@ class UserRegistrationForm(UserCreationForm):
     """
     Пользовательская форма регистрации
     Расширяет встроенную форму UserCreationForm Django
+    Добавляет поля email, имя и фамилию
     """
     # Поле электронной почты (обязательно)
     email = forms.EmailField(
@@ -97,7 +98,7 @@ class UserRegistrationForm(UserCreationForm):
         return user
 
 
-class UserProfileForm(forms.ModelForm):
+class ProfileUpdateForm(forms.ModelForm):
     """
     Форма для редактирования профиля пользователя
     """
@@ -106,7 +107,8 @@ class UserProfileForm(forms.ModelForm):
         max_length=30,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control'
+            'class': 'form-control',
+            'placeholder': 'Имя'
         })
     )
 
@@ -115,7 +117,8 @@ class UserProfileForm(forms.ModelForm):
         max_length=30,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control'
+            'class': 'form-control',
+            'placeholder': 'Фамилия'
         })
     )
 
@@ -123,7 +126,8 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
-            'class': 'form-control'
+            'class': 'form-control',
+            'placeholder': 'Email'
         })
     )
 
@@ -134,7 +138,8 @@ class UserProfileForm(forms.ModelForm):
             # Биография - многострочное поле
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 4
+                'rows': 4,
+                'placeholder': 'Расскажите о себе'
             }),
             # Аватар - загрузка файла
             'avatar': forms.FileInput(attrs={
@@ -142,11 +147,13 @@ class UserProfileForm(forms.ModelForm):
             }),
             # Веб-сайт - URL поле
             'website': forms.URLInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'https://yoursite.com'
             }),
             # Телефон - текстовое поле
             'phone': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': '+7 (XXX) XXX-XX-XX'
             }),
             # Дата рождения - поле даты
             'birth_date': forms.DateInput(attrs={
@@ -155,7 +162,8 @@ class UserProfileForm(forms.ModelForm):
             }),
             # Местоположение - текстовое поле
             'location': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ваш город'
             }),
         }
 

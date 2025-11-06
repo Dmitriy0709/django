@@ -1,6 +1,3 @@
-"""
-Модели приложения shopapp (магазин товаров)
-"""
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -9,7 +6,7 @@ class Product(models.Model):
     """
     Модель товара
     Представляет товар в магазине и связана с пользователем, который его создал
-    Связь: много товаров на одного пользователя (ForeignKey)
+    Связь: много товаров на одного пользователя (ForeignKey - один ко многим)
     """
     # Название товара
     name = models.CharField(
@@ -44,13 +41,14 @@ class Product(models.Model):
         verbose_name='Изображение товара'
     )
 
-    # Пользователь, создавший товар (КЛЮЧЕВОЕ ПОЛЕ)
+    # ========== КЛЮЧЕВОЕ ПОЛЕ: Связь с пользователем ==========
     # Один пользователь может создавать много товаров
-    # При удалении пользователя товар не удаляется (PROTECT)
+    # Один товар связан только с одним пользователем
+    # on_delete=PROTECT: товар не удалится если удалён пользователь
     created_by = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
-        related_name='created_products',
+        related_name='created_products',  # user.created_products.all()
         verbose_name='Создано пользователем'
     )
 
@@ -76,7 +74,8 @@ class Product(models.Model):
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
         ordering = ['-created_at']
-        # Пользовательские разрешения
+
+        # ========== ПОЛЬЗОВАТЕЛЬСКИЕ РАЗРЕШЕНИЯ ==========
         permissions = [
             ('can_create_product', 'Может создавать товар'),
             ('can_edit_product', 'Может редактировать товар'),
@@ -110,7 +109,9 @@ class Category(models.Model):
     )
 
     # Дата создания
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         verbose_name = 'Категория'

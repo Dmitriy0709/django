@@ -7,17 +7,17 @@ urlpatterns = [
     # Админ-панель Django
     path('admin/', admin.site.urls),
 
-    # Маршруты приложения аутентификации (изменён путь с myauth на accounts)
+    # Маршруты приложения аутентификации (ИЗМЕНЁН ПУТЬ НА accounts)
     path('accounts/', include('myauth.urls')),
 
-    # Маршруты приложения req
+    # Маршруты приложения req (если есть)
     path('req/', include('req.urls')),
 
     # Маршруты приложения магазина
     path('shop/', include('shopapp.urls')),
 ]
 
-# Подключение статических файлов и медиа в режиме разработки
+# Подключение статических и медиа файлов в режиме разработки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

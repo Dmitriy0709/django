@@ -6,7 +6,7 @@ from .models import Product, Order, OrderItem
 class ProductForm(forms.ModelForm):
     """
     Форма для создания и редактирования товаров
-    Автоматически связывает товар с пользователем, который его создал
+    Поле created_by НЕ включено (устанавливается в представлении)
     """
 
     class Meta:
@@ -63,23 +63,6 @@ class ProductForm(forms.ModelForm):
         if quantity is not None and quantity < 0:
             raise ValidationError('Количество должно быть неотрицательным.')
         return quantity
-
-
-class ProductCreateForm(ProductForm):
-    """
-    Форма для создания товаров с автоматическим присваиванием пользователя
-    """
-
-    def save(self, commit=True):
-        """
-        Сохранение товара и связывание его с текущим пользователем
-        created_by устанавливается в представлении перед сохранением
-        """
-        instance = super().save(commit=False)
-        # created_by будет установлена в представлении
-        if commit:
-            instance.save()
-        return instance
 
 
 class OrderForm(forms.ModelForm):

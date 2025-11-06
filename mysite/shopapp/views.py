@@ -1,16 +1,18 @@
 from django.shortcuts import render, redirect
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView,
-    DeleteView, FormView
+    DeleteView
 )
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from .models import Product, Category, Order, OrderItem
-from .forms import ProductCreateForm, OrderForm, OrderItemForm
+from .forms import ProductForm
 
+
+# ========== СПИСОК ТОВАРОВ ==========
 
 class ProductListView(ListView):
     """
@@ -27,6 +29,8 @@ class ProductListView(ListView):
         return Product.objects.filter(is_active=True).select_related('created_by')
 
 
+# ========== ДЕТАЛИ ТОВАРА ==========
+
 class ProductDetailView(DetailView):
     """
     Представление для отображения детальной информации о товаре
@@ -40,6 +44,8 @@ class ProductDetailView(DetailView):
         return Product.objects.filter(is_active=True)
 
 
+# ========== СОЗДАНИЕ ТОВАРА ==========
+
 class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     """
     Представление для создания нового товара
@@ -50,32 +56,29 @@ class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
     Автоматически присваивает текущего пользователя как автора товара
     """
     model = Product
-    form_class = ProductCreateForm
+    form_class = ProductForm
     template_name = 'shopapp/product_form.html'
     # URL для редиректа неавторизованных пользователей
     login_url = 'myauth:login'
-    # Требуемое разрешение
+    # ========== КЛЮЧЕВОЙ ПАРАМЕТР: Требуемое разрешение
     permission_required = 'shopapp.can_create_product'
 
     def form_valid(self, form):
         """
-        Обработка успешной отправки формы
-        Переопределяем метод form_valid согласно заданию:
-        - Устанавливаем текущего пользователя как created_by
-        - Используем super() для вызова родительского метода
+        Переопределение метода form_valid
+        Устанавливает текущего пользователя как автора товара
         """
-        # Устанавливаем текущего пользователя как автора товара
+        # ========== УСТАНОВКА АВТОРА
         form.instance.created_by = self.request.user
+
         # Добавление сообщения об успехе
         messages.success(self.request, 'Товар успешно создан!')
-        # Вызов родительского метода для сохранения
+
+        # ========== ИСПОЛЬЗОВАНИЕ super() для сохранения
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        """
-        Обработка ошибок формы
-        """
-        # Добавление сообщений об ошибках валидации
+        """Обработка ошибок формы"""
         for field, errors in form.errors.items():
             for error in errors:
                 messages.error(self.request, f'{field}: {error}')
@@ -86,25 +89,28 @@ class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
         return reverse_lazy('product_detail', kwargs={'pk': self.object.pk})
 
 
+# ========== РЕДАКТИРОВАНИЕ ТОВАРА ==========
+
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     """
     Представление для редактирования товара
+
     Ограничения доступа:
     - Суперпользователь может редактировать любой товар
-    - Остальные пользователи могут редактировать только если:
+    - Остальные пользователи могут редактировать товар ТОЛЬКО если:
       1) У них есть разрешение 'can_edit_product'
       2) Они являются автором товара
     """
     model = Product
-    form_class = ProductCreateForm
+    form_class = ProductForm
     template_name = 'shopapp/product_form.html'
     login_url = 'myauth:login'
 
     def get_queryset(self):
         """
-        Фильтрация товаров в зависимости от прав пользователя
+        Фильтрация товаров на основе прав пользователя
         Суперпользователь видит все товары
-        Остальные - только свои товары
+        Остальные пользователи видят только свои товары
         """
         if self.request.user.is_superuser:
             return Product.objects.all()
@@ -112,31 +118,32 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         """
-        Проверка разрешений перед доступом к представлению
+        Проверка разрешений перед редактированием товара
         """
         product = self.get_object()
 
-        # Если пользователь НЕ суперпользователь
-        if not request.user.is_superuser:
-            # Проверяем наличие разрешения
-            has_permission = request.user.has_perm('shopapp.can_edit_product')
-            # Проверяем является ли пользователь автором
-            is_author = product.created_by == request.user
+        # ========== ПРОВЕРКА 1: Суперпользователь может всегда
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
 
-            # Если нет разрешения И/ИЛИ не является автором
-            if not (has_permission and is_author):
-                messages.error(
-                    request,
-                    'У вас нет разрешения редактировать этот товар.'
-                )
-                return HttpResponseForbidden('Доступ запрещён.')
+        # ========== ПРОВЕРКА 2: Разрешение на редактирование
+        has_permission = request.user.has_perm('shopapp.can_edit_product')
+
+        # ========== ПРОВЕРКА 3: Является ли автором товара
+        is_author = product.created_by == request.user
+
+        # ========== ПРОВЕРКА 4: ОБЕ УСЛОВИЯ ДОЛЖНЫ БЫТЬ ВЫПОЛНЕНЫ
+        if not (has_permission and is_author):
+            messages.error(
+                request,
+                'У вас нет разрешения редактировать этот товар.'
+            )
+            return HttpResponseForbidden('Доступ запрещён.')
 
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """
-        Обработка успешной отправки формы
-        """
+        """Обработка успешной отправки формы"""
         messages.success(self.request, 'Товар успешно обновлён!')
         return super().form_valid(form)
 
@@ -145,11 +152,14 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('product_detail', kwargs={'pk': self.object.pk})
 
 
+# ========== УДАЛЕНИЕ ТОВАРА ==========
+
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
     """
     Представление для удаления товара
-    Только суперпользователь или пользователь с разрешением 'can_delete_product'
-    и являющийся автором товара может удалить его
+    Аналогичные ограничения как при редактировании товара:
+    - Только суперпользователь или пользователь с разрешением
+      'can_delete_product' и являющийся автором может удалить товар
     """
     model = Product
     template_name = 'shopapp/product_confirm_delete.html'
@@ -157,17 +167,13 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     login_url = 'myauth:login'
 
     def get_queryset(self):
-        """
-        Фильтрация товаров при удалении
-        """
+        """Фильтрация товаров при удалении"""
         if self.request.user.is_superuser:
             return Product.objects.all()
         return Product.objects.filter(created_by=self.request.user)
 
     def dispatch(self, request, *args, **kwargs):
-        """
-        Проверка разрешений перед удалением
-        """
+        """Проверка разрешений перед удалением"""
         product = self.get_object()
 
         # Если пользователь НЕ суперпользователь
@@ -177,7 +183,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
             # Проверяем является ли пользователь автором
             is_author = product.created_by == request.user
 
-            # Если нет разрешения И/ИЛИ не является автором
+            # Если нет разрешения ИЛИ не является автором
             if not (has_permission and is_author):
                 messages.error(
                     request,
@@ -188,12 +194,12 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         return super().dispatch(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        """
-        Удаление товара и показание сообщения об успехе
-        """
+        """Удаление товара с выводом сообщения об успехе"""
         messages.success(request, 'Товар успешно удалён!')
         return super().delete(request, *args, **kwargs)
 
+
+# ========== СПИСОК ЗАКАЗОВ ==========
 
 class OrderListView(LoginRequiredMixin, ListView):
     """
@@ -208,6 +214,8 @@ class OrderListView(LoginRequiredMixin, ListView):
         """Получить только заказы текущего пользователя"""
         return Order.objects.filter(user=self.request.user).prefetch_related('items')
 
+
+# ========== ДЕТАЛИ ЗАКАЗА ==========
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
     """
