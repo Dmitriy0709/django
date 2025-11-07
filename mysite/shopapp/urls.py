@@ -1,34 +1,35 @@
 from django.urls import path
+from . import views
 
-from .views import (ShopIndexView,
-    GroupListView,
-    ProductDetailsView,
-    ProductsListView,
-    OrdersListView,
-    OrderDetailView,
-    ProductCreateView,
-    ProductUpdateView,
-    ProductDeleteView,
-    OrderCreateView,
-    OrderUpdateView,
-    OrderDeleteView,
-)
-
-app_name = "shopapp"
+# Пространство имён для приложения
+app_name = 'shopapp'
 
 urlpatterns = [
-    path("", ShopIndexView.as_view(), name="index"),
-    path("groups/", GroupListView.as_view(), name="groups_list"),
+    # ========== ТОВАРЫ ==========
 
-    path("products/", ProductsListView.as_view(), name="products_list"),
-    path("products/<int:pk>/", ProductDetailsView.as_view(), name="product_details"),
-    path("products/<int:pk>/update/", ProductUpdateView.as_view(), name="product_update"),
-    path("products/<int:pk>/archive/", ProductDeleteView.as_view(), name="product_delete"),
-    path("products/create/", ProductCreateView.as_view(), name="product_create"),
+    # Главная страница магазина (список всех товаров)
+    path('', views.ProductListView.as_view(), name='product_list'),
 
-    path("orders/", OrdersListView.as_view(), name="orders_list"),
-    path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
-    path("orders/create/", OrderCreateView.as_view(), name="order_create"),
-    path("orders/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
-    path("orders/<int:pk>/delete/", OrderDeleteView.as_view(), name="order_delete"),
+    # Детали товара
+    path('product/<int:pk>/', views.ProductDetailView.as_view(), name='product_detail'),
+
+    # Создание нового товара
+    # Требует: аутентификации + разрешения 'shopapp.can_create_product'
+    path('product/create/', views.ProductCreateView.as_view(), name='product_create'),
+
+    # Редактирование товара
+    # Требует: аутентификации + разрешения 'shopapp.can_edit_product' + авторства
+    path('product/<int:pk>/edit/', views.ProductUpdateView.as_view(), name='product_update'),
+
+    # Удаление товара
+    # Требует: аутентификации + разрешения 'shopapp.can_delete_product' + авторства
+    path('product/<int:pk>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
+
+    # ========== ЗАКАЗЫ ==========
+
+    # Список заказов пользователя
+    path('orders/', views.OrderListView.as_view(), name='order_list'),
+
+    # Детали заказа
+    path('order/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
 ]
