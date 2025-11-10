@@ -1,35 +1,20 @@
 from django.urls import path
 from . import views
 
-# Пространство имён для приложения
-app_name = 'shopapp'
+app_name = 'shop'
 
 urlpatterns = [
-    # ========== ТОВАРЫ ==========
-
-    # Главная страница магазина (список всех товаров)
+    # Product list
     path('', views.ProductListView.as_view(), name='product_list'),
 
-    # Детали товара
+    # Product detail
     path('product/<int:pk>/', views.ProductDetailView.as_view(), name='product_detail'),
 
-    # Создание нового товара
-    # Требует: аутентификации + разрешения 'shopapp.can_create_product'
-    path('product/create/', views.ProductCreateView.as_view(), name='product_create'),
+    # Product CRUD
+    path('create/', views.CreateProductView.as_view(), name='create_product'),
+    path('product/<int:pk>/edit/', views.EditProductView.as_view(), name='edit_product'),
+    path('product/<int:pk>/delete/', views.DeleteProductView.as_view(), name='delete_product'),
 
-    # Редактирование товара
-    # Требует: аутентификации + разрешения 'shopapp.can_edit_product' + авторства
-    path('product/<int:pk>/edit/', views.ProductUpdateView.as_view(), name='product_update'),
-
-    # Удаление товара
-    # Требует: аутентификации + разрешения 'shopapp.can_delete_product' + авторства
-    path('product/<int:pk>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
-
-    # ========== ЗАКАЗЫ ==========
-
-    # Список заказов пользователя
-    path('orders/', views.OrderListView.as_view(), name='order_list'),
-
-    # Детали заказа
-    path('order/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
+    # API
+    path('api/create/', views.create_product_api, name='create_product_api'),
 ]

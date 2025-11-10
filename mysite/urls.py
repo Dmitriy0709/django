@@ -1,23 +1,16 @@
-from django.contrib import admin
 from django.urls import path, include
+from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
-    # Админ-панель Django
     path('admin/', admin.site.urls),
-
-    # Маршруты приложения аутентификации (ИЗМЕНЁН ПУТЬ НА accounts)
-    path('accounts/', include('myauth.urls')),
-
-    # Маршруты приложения req (если есть)
-    path('req/', include('req.urls')),
-
-    # Маршруты приложения магазина
-    path('shop/', include('shopapp.urls')),
+    path('accounts/', include('myauth.urls')),  # Changed from 'myauth' to 'accounts'
+    path('shop/', include('shop.urls')),  # Assuming you have a shop app
+    path('', views.home_view, name='home'),  # Home page
 ]
 
-# Подключение статических и медиа файлов в режиме разработки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
