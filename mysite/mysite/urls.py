@@ -23,5 +23,5 @@ urlpatterns = [
     path('shop/', include('shopapp.urls')),
     path('req/', include('requestdataapp.urls')),
     path('accounts/', include('myauth.urls')),
-    path('', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),  # ← измените здесь
 ]
