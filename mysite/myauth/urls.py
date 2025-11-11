@@ -13,7 +13,7 @@ from django.contrib.auth.views import (
 
 from . import views
 
-app_name = 'myauth'
+app_name = 'accounts'  # ← ИЗМЕНИТЕ ЗДЕСЬ (было 'myauth', теперь 'accounts')
 
 urlpatterns = [
     # Аутентификация
