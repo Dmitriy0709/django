@@ -25,17 +25,22 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'myauth:profile' %}">{{ user.username }}</a>
+                            <a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'myauth:logout' %}">Logout</a>
+                            <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link" style="border: none; background: none; padding: 0.5rem 1rem; color: white; text-decoration: none; cursor: pointer; font-size: 1rem;">
+                                    Logout
+                                </button>
+                            </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'myauth:login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'myauth:register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
                         </li>
                     {% endif %}
                 </ul>

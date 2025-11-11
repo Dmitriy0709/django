@@ -10,11 +10,11 @@
         <p>{{ product.description }}</p>
         <h4>Price: ${{ product.price }}</h4>
 
-        {% if product.can_edit request.user %}
+        {% if user.is_superuser or product.created_by == user and perms.shopapp.can_edit_product %}
             <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">Edit</a>
         {% endif %}
 
-        {% if product.can_delete request.user %}
+        {% if user.is_superuser or product.created_by == user and perms.shopapp.can_delete_product %}
             <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">Delete</a>
         {% endif %}
 
