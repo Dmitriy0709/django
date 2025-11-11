@@ -12,8 +12,8 @@
         <a class="btn btn-primary btn-lg" href="{% url 'shopapp:product_list' %}" role="button">Browse Products</a>
     {% else %}
         <p>Please login or register to get started.</p>
-        <a class="btn btn-primary btn-lg" href="{% url 'myauth:login' %}" role="button">Login</a>
-        <a class="btn btn-success btn-lg" href="{% url 'myauth:register' %}" role="button">Register</a>
+        <a class="btn btn-primary btn-lg" href="{% url 'accounts:login' %}" role="button">Login</a>
+        <a class="btn btn-success btn-lg" href="{% url 'accounts:register' %}" role="button">Register</a>
     {% endif %}
 </div>
 {% endblock %}
