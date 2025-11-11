@@ -1,0 +1,17 @@
+{% extends "myauth/base.html" %}
+
+{% block title %}Set Cookie{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h2>Cookie Set Successfully</h2>
+        <div class="alert alert-success">
+            <p>Your cookie has been set!</p>
+            <p>Favorite food cookie set to: <strong>pizza</strong></p>
+            <p>Cookie will expire in 1 hour</p>
+        </div>
+        <a href="{% url 'myauth:get_cookie' %}" class="btn btn-primary">View Cookie</a>
+    </div>
+</div>
+{% endblock %}

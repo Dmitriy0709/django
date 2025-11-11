@@ -1,104 +1,104 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, DeleteView
+)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required, permission_required
 from django.urls import reverse_lazy
-from django.http import HttpResponseForbidden
+from django.http import Http404
+
 from .models import Product
 from .forms import ProductForm
 
 
 class ProductListView(ListView):
-    """View to list all products"""
+    """
+    Представление для отображения списка всех продуктов.
+    """
     model = Product
-    template_name = 'shop/product_list.html'
+    template_name = 'shopapp/product_list.html'
     context_object_name = 'products'
     paginate_by = 10
 
-    def get_queryset(self):
-        return Product.objects.all().order_by('-created_at')
-
 
 class ProductDetailView(DetailView):
-    """View to display product details"""
+    """
+    Представление для отображения деталей продукта.
+    """
     model = Product
-    template_name = 'shop/product_detail.html'
+    template_name = 'shopapp/product_detail.html'
     context_object_name = 'product'
-    slug_field = 'id'
-    slug_url_kwarg = 'pk'
 
 
-class CreateProductView(LoginRequiredMixin, CreateView):
-    """View to create a new product"""
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    """
+    Представление для создания нового продукта.
+    Только пользователи с разрешением на создание могут создавать продукты.
+    """
     model = Product
     form_class = ProductForm
-    template_name = 'shop/create_product.html'
-    success_url = reverse_lazy('shop:product_list')
+    template_name = 'shopapp/product_form.html'
+    success_url = reverse_lazy('shopapp:product_list')
     login_url = 'myauth:login'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.has_perm('shop.can_create_product'):
-            return HttpResponseForbidden("You don't have permission to create products")
+        if not request.user.has_perm('shopapp.can_create_product'):
+            raise Http404("You don't have permission to create products")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """Bind the product to the current user"""
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Product'
+        return context
 
-class EditProductView(LoginRequiredMixin, UpdateView):
-    """View to edit a product"""
+
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Представление для редактирования продукта.
+    Ограничение: суперпользователь или автор с разрешением на редактирование.
+    """
     model = Product
     form_class = ProductForm
-    template_name = 'shop/edit_product.html'
-    success_url = reverse_lazy('shop:product_list')
+    template_name = 'shopapp/product_form.html'
+    success_url = reverse_lazy('shopapp:product_list')
     login_url = 'myauth:login'
 
-    def dispatch(self, request, *args, **kwargs):
+    def test_func(self):
         product = self.get_object()
+        # Суперпользователь может редактировать всегда
+        if self.request.user.is_superuser:
+            return True
+        # Остальные - только если они автор и имеют разрешение
+        return (product.created_by == self.request.user and
+                self.request.user.has_perm('shopapp.can_edit_product'))
 
-        # Check permissions
-        if not product.can_edit(request.user):
-            return HttpResponseForbidden("You don't have permission to edit this product")
+    def handle_no_permission(self):
+        raise Http404("You don't have permission to edit this product")
 
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        """Bind the product to the current user"""
-        form.instance.created_by = self.request.user
-        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Product'
+        return context
 
 
-class DeleteProductView(LoginRequiredMixin, DeleteView):
-    """View to delete a product"""
+class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Представление для удаления продукта.
+    """
     model = Product
-    template_name = 'shop/confirm_delete_product.html'
-    success_url = reverse_lazy('shop:product_list')
+    template_name = 'shopapp/product_confirm_delete.html'
+    success_url = reverse_lazy('shopapp:product_list')
     login_url = 'myauth:login'
 
-    def dispatch(self, request, *args, **kwargs):
+    def test_func(self):
         product = self.get_object()
+        if self.request.user.is_superuser:
+            return True
+        return (product.created_by == self.request.user and
+                self.request.user.has_perm('shopapp.can_delete_product'))
 
-        # Check permissions
-        if not product.can_delete(request.user):
-            return HttpResponseForbidden("You don't have permission to delete this product")
-
-        return super().dispatch(request, *args, **kwargs)
-
-
-@login_required(login_url='myauth:login')
-@permission_required('shop.can_create_product', raise_exception=True)
-def create_product_api(request):
-    """API view to create product via form"""
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.created_by = request.user
-            product.save()
-            return redirect('shop:product_detail', pk=product.id)
-    else:
-        form = ProductForm()
-
-    return render(request, 'shop/create_product.html', {'form': form})
+    def handle_no_permission(self):
+        raise Http404("You don't have permission to delete this product")

@@ -1,0 +1,39 @@
+{% extends "shopapp/base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<h2>Products</h2>
+
+{% if user.is_authenticated and perms.shopapp.can_create_product %}
+    <div class="mb-4">
+        <a href="{% url 'shopapp:product_create' %}" class="btn btn-primary">Create New Product</a>
+    </div>
+{% endif %}
+
+<div class="row">
+    {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                    <p><strong>Price:</strong> ${{ product.price }}</p>
+                    <p><small class="text-muted">Created by: {{ product.created_by.username }}</small></p>
+                    <a href="{% url 'shopapp:product_detail' product.pk %}" class="btn btn-info btn-sm">View</a>
+
+                    {% if product.can_edit request.user %}
+                        <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    {% endif %}
+
+                    {% if product.can_delete request.user %}
+                        <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No products found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

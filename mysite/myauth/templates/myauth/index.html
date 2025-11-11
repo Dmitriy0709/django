@@ -1,0 +1,19 @@
+{% extends "myauth/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to MyApp!</h1>
+    <p class="lead">This is a Django application with authentication and product management.</p>
+    <hr class="my-4">
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'shopapp:product_list' %}" role="button">Browse Products</a>
+    {% else %}
+        <p>Please login or register to get started.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'myauth:login' %}" role="button">Login</a>
+        <a class="btn btn-success btn-lg" href="{% url 'myauth:register' %}" role="button">Register</a>
+    {% endif %}
+</div>
+{% endblock %}

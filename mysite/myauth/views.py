@@ -1,90 +1,119 @@
 from django.shortcuts import render, redirect
+from django.views.generic import FormView
 from django.contrib.auth.views import LoginView, LogoutView
-from django.views.generic import CreateView
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.contrib.auth.models import User
-from .forms import UserRegistrationForm, ProfileForm
+from django.http import Http404
+
+from .forms import UserRegistrationForm, ProfileUpdateForm
 from .models import Profile
 
 
 class CustomLoginView(LoginView):
-    """Custom login view"""
+    """
+    Стандартное представление для входа пользователя.
+    Используется встроенный класс LoginView с параметрами.
+    """
     template_name = 'myauth/login.html'
     redirect_authenticated_user = True
 
+    def get_success_url(self):
+        return reverse_lazy('index')
+
 
 class CustomLogoutView(LogoutView):
-    """Custom logout view with redirect"""
-    next_page = reverse_lazy('home')
+    """
+    Пользовательский класс для выхода пользователя.
+    Переопределяем стандартный LogoutView для изменения страницы перенаправления.
+    """
+    next_page = 'index'
 
 
-class RegisterView(CreateView):
-    """User registration view"""
+class RegisterView(FormView):
+    """
+    Представление для регистрации новых пользователей.
+    """
     form_class = UserRegistrationForm
     template_name = 'myauth/register.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('myauth:login')
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Регистрация'
+        return context
 
 
-# Cookie views
+@login_required(login_url='myauth:login')
 def set_cookie_view(request):
-    """View to set data in cookies"""
+    """
+    Представление для установки значения в cookies пользователя.
+    """
     response = render(request, 'myauth/set_cookie.html')
-    response.set_cookie('user_preference', 'light_mode', max_age=3600 * 24 * 365)
+    response.set_cookie('favorite_food', 'pizza', max_age=3600)
     return response
 
 
+@login_required(login_url='myauth:login')
 def get_cookie_view(request):
-    """View to read data from cookies"""
-    user_preference = request.COOKIES.get('user_preference', 'default_mode')
-    context = {
-        'user_preference': user_preference
-    }
-    return render(request, 'myauth/get_cookie.html', context)
+    """
+    Представление для чтения значений из cookies пользователя.
+    Возвращает значение по умолчанию, если оно отсутствует.
+    """
+    favorite_food = request.COOKIES.get('favorite_food', 'не установлено')
+    return render(request, 'myauth/get_cookie.html', {
+        'favorite_food': favorite_food
+    })
 
 
-# Session views
+@login_required(login_url='myauth:login')
 def set_session_view(request):
-    """View to set data in session"""
-    request.session['user_theme'] = 'dark'
-    request.session['language'] = 'en'
+    """
+    Представление для установки значения в session пользователя.
+    """
+    request.session['user_data'] = {
+        'theme': 'dark',
+        'language': 'ru',
+        'notifications': True
+    }
     return render(request, 'myauth/set_session.html')
 
 
+@login_required(login_url='myauth:login')
 def get_session_view(request):
-    """View to read data from session"""
-    user_theme = request.session.get('user_theme', 'light')
-    language = request.session.get('language', 'en')
-    context = {
-        'user_theme': user_theme,
-        'language': language
-    }
-    return render(request, 'myauth/get_session.html', context)
+    """
+    Представление для чтения значений из session пользователя.
+    Возвращает значение по умолчанию, если оно отсутствует.
+    """
+    user_data = request.session.get('user_data', {
+        'theme': 'light',
+        'language': 'en',
+        'notifications': False
+    })
+    return render(request, 'myauth/get_session.html', {
+        'user_data': user_data
+    })
 
 
-def profile_view(request, username):
-    """View to display user profile"""
-    user = User.objects.get(username=username)
-    profile = user.profile
-    context = {
-        'user': user,
-        'profile': profile
-    }
-    return render(request, 'myauth/profile.html', context)
-
-
-def edit_profile_view(request):
-    """View to edit user profile"""
-    profile = request.user.profile
+@login_required(login_url='myauth:login')
+def profile_view(request):
+    """
+    Представление для просмотра и обновления профиля пользователя.
+    """
+    profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('profile', username=request.user.username)
+            return redirect('myauth:profile')
     else:
-        form = ProfileForm(instance=profile)
+        form = ProfileUpdateForm(instance=profile)
 
-    context = {
+    return render(request, 'myauth/profile.html', {
+        'profile': profile,
         'form': form
-    }
-    return render(request, 'myauth/edit_profile.html', context)
+    })

@@ -1,0 +1,15 @@
+{% extends "myauth/base.html" %}
+
+{% block title %}Set Session{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h2>Session Set Successfully</h2>
+        <div class="alert alert-success">
+            <p>Your session data has been set!</p>
+        </div>
+        <a href="{% url 'myauth:get_session' %}" class="btn btn-primary">View Session</a>
+    </div>
+</div>
+{% endblock %}

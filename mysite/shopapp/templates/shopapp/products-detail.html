@@ -1,0 +1,24 @@
+{% extends "shopapp/base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>{{ product.name }}</h2>
+        <p class="text-muted">By {{ product.created_by.username }}</p>
+        <p>{{ product.description }}</p>
+        <h4>Price: ${{ product.price }}</h4>
+
+        {% if product.can_edit request.user %}
+            <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">Edit</a>
+        {% endif %}
+
+        {% if product.can_delete request.user %}
+            <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">Delete</a>
+        {% endif %}
+
+        <a href="{% url 'shopapp:product_list' %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "myauth/base.html" %}
+
+{% block title %}Get Cookie{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h2>Your Cookie Data</h2>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Favorite Food (from cookie):</strong></p>
+                <p class="alert alert-info">{{ favorite_food }}</p>
+                <p><small>Default value is set if cookie is not found</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
