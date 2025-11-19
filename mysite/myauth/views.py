@@ -3,7 +3,8 @@ from django.views.generic import FormView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.http import Http404
+from django.http import Http404, JsonResponse, HttpRequest
+from django.views import View
 
 from .forms import UserRegistrationForm, ProfileUpdateForm
 from .models import Profile
@@ -117,3 +118,7 @@ def profile_view(request):
         'profile': profile,
         'form': form
     })
+
+class FooBarView(View):
+    def get(self, request: HttpRequest) -> JsonResponse:
+        return JsonResponse({"foo": "bar", "spam": "eggs"})

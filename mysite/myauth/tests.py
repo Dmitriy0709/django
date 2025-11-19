@@ -20,3 +20,5 @@ class GetCookieViewTestCase(TestCase):
         )
         # Измени на реальный текст из шаблона
         self.assertContains(response, "Your Cookie Data")
+
+

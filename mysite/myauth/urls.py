@@ -12,6 +12,7 @@ from django.contrib.auth.views import (
 )
 
 from . import views
+from .views import FooBarView
 
 app_name = 'accounts'  # ← ИЗМЕНИТЕ ЗДЕСЬ (было 'myauth', теперь 'accounts')
 
@@ -53,4 +54,6 @@ urlpatterns = [
     path('password-reset/complete/', PasswordResetCompleteView.as_view(
         template_name='myauth/password_reset_complete.html'
     ), name='password_reset_complete'),
+
+    path("foo-bar/", FooBarView.as_view(), name="foo-bar")
 ]
