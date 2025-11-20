@@ -51,18 +51,34 @@ class ProductCreateViewTestCase(TestCase):
             Product.objects.filter(name=self.product_name).exists()
         )
 
+
 class ProductDetailsViewTestCase(TestCase):
-    def setUp(self) -> None:
-        self.product = Product.objects.create(name="Best Product")
-
-    def tearDown(self) -> None:
-        self.product.delete()
-
-    def test_get_product(self):
-        self.client.get(
-            reverse("shopapp:product_details", kwargs={"pk": self.product.pk})
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Создай пользователя для created_by
+        cls.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        # Создай продукт со всеми обязательными полями
+        cls.product = Product.objects.create(
+            name="Best Product",
+            price="99.99",
+            description="Test product description",
+            created_by=cls.user
         )
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.product.delete()
+        cls.user.delete()
+        super().tearDownClass()
 
-
+    def test_get_product(self):
+        response = self.client.get(
+            reverse("shopapp:product_detail", kwargs={"pk": self.product.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Best Product")
 
