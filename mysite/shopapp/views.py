@@ -107,3 +107,5 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def handle_no_permission(self):
         raise Http404("You don't have permission to delete this product")
+
+
