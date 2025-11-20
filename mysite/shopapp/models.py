@@ -22,6 +22,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
+        ordering = ['id']
         permissions = [
             ('can_create_product', 'Can create product'),
             ('can_edit_product', 'Can edit product'),
