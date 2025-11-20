@@ -1,4 +1,5 @@
 # myauth/tests.py
+import json
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -22,3 +23,13 @@ class GetCookieViewTestCase(TestCase):
         self.assertContains(response, "Your Cookie Data")
 
 
+class FooBarViewTest(TestCase):
+    def test_foo_bar_view(self):
+        response = self.client.get(reverse("accounts:foo-bar"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers['content-type'], 'application/json',
+        )
+        expected_data = {"foo": "bar", "spam": "eggs"}
+        received_data = json.loads(response.content)
+        self.assertEqual(received_data, expected_data)
