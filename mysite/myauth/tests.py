@@ -33,3 +33,4 @@ class FooBarViewTest(TestCase):
         expected_data = {"foo": "bar", "spam": "eggs"}
         received_data = json.loads(response.content)
         self.assertEqual(received_data, expected_data)
+
