@@ -82,3 +82,8 @@ class ProductDetailsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Best Product")
 
+    def test_get_product_and_check_content(self):
+        response = self.client.get(
+            reverse("shopapp:product_detail", kwargs={"pk": self.product.pk})
+        )
+        self.assertContains(response, self.product.name)
