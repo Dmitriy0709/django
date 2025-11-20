@@ -1,4 +1,6 @@
 # shopapp/tests.py
+from string import ascii_letters
+from random import choices
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User, Permission
@@ -20,6 +22,8 @@ class ProductCreateViewTestCase(TestCase):
             username='testuser',
             password='testpass123'
         )
+        self.product_name = "".join(choices(ascii_letters, k=10))
+        Product.objects.filter(name=self.product_name).delete()
 
         # Дай ему permission на создание продуктов
         content_type = ContentType.objects.get_for_model(Product)
@@ -36,15 +40,16 @@ class ProductCreateViewTestCase(TestCase):
         response = self.client.post(
             reverse("shopapp:product_create"),
             {
-                "name": "Table123",
+                "name": self.product_name,
                 "price": "123.45",
                 "description": "A good table",
                 "discount": "10",
             }
         )
         self.assertRedirects(response, reverse("shopapp:product_list"))
-
-        # Дополнительно проверь что продукт создан
         self.assertTrue(
-            Product.objects.filter(name="Table123").exists()
+            Product.objects.filter(name=self.product_name).exists()
         )
+
+
+
