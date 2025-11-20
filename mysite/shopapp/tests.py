@@ -51,5 +51,18 @@ class ProductCreateViewTestCase(TestCase):
             Product.objects.filter(name=self.product_name).exists()
         )
 
+class ProductDetailsViewTestCase(TestCase):
+    def setUp(self) -> None:
+        self.product = Product.objects.create(name="Best Product")
+
+    def tearDown(self) -> None:
+        self.product.delete()
+
+    def test_get_product(self):
+        self.client.get(
+            reverse("shopapp:product_details", kwargs={"pk": self.product.pk})
+        )
+
+
 
 
