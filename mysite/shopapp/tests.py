@@ -88,16 +88,9 @@ class ProductDetailsViewTestCase(TestCase):
         )
         self.assertContains(response, self.product.name)
 
+
 class ProductsListViewTestCase(TestCase):
     fixtures = ['products.json']
-
-    def setUp(self):
-        # Создай пользователя перед каждым тестом
-        if not User.objects.filter(username='fixture_user').exists():
-            User.objects.create_user(
-                username='fixture_user',
-                password='testpass123'
-            )
 
     def test_products(self):
         response = self.client.get(reverse("shopapp:product_list"))
@@ -109,12 +102,14 @@ class ProductsListViewTestCase(TestCase):
 class OrdersListViewTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.credentials = dict(username='fixture_user', password='testpass123')
+        super().setUpClass()
+        cls.credentials = dict(username='orders_test_user', password='testpass123')
         cls.user = User.objects.create_user(**cls.credentials)
 
     @classmethod
     def tearDownClass(cls):
         cls.user.delete()
+        super().tearDownClass()
 
     def setUp(self):
         self.client.login(**self.credentials)
