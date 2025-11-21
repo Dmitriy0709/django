@@ -5,6 +5,7 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import Http404
+from django.conf import settings
 
 from .models import Product, Order
 from .forms import ProductForm
@@ -43,7 +44,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     form_class = ProductForm
     template_name = 'shopapp/product_form.html'
     success_url = reverse_lazy('shopapp:product_list')
-    login_url = 'myauth:login'
+    login_url = settings.LOGIN_URL
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.has_perm('shopapp.can_create_product'):
@@ -69,7 +70,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = ProductForm
     template_name = 'shopapp/product_form.html'
     success_url = reverse_lazy('shopapp:product_list')
-    login_url = 'myauth:login'
+    login_url = settings.LOGIN_URL
 
     def test_func(self):
         product = self.get_object()
@@ -96,7 +97,7 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Product
     template_name = 'shopapp/product_confirm_delete.html'
     success_url = reverse_lazy('shopapp:product_list')
-    login_url = 'myauth:login'
+    login_url = settings.LOGIN_URL
 
     def test_func(self):
         product = self.get_object()
@@ -117,7 +118,7 @@ class OrderListView(LoginRequiredMixin, ListView):
     template_name = 'shopapp/order_list.html'
     context_object_name = 'orders'
     paginate_by = 10
-    login_url = 'myauth:login'
+    login_url = settings.LOGIN_URL
 
     def get_queryset(self):
         # Показываем только заказы текущего пользователя
@@ -131,7 +132,7 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
     model = Order
     template_name = 'shopapp/order_detail.html'
     context_object_name = 'order'
-    login_url = 'myauth:login'
+    login_url = settings.LOGIN_URL
 
     def get_queryset(self):
         # Пользователь может видеть только свои заказы

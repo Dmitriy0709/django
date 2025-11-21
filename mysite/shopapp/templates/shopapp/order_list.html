@@ -1,43 +1,108 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .order-card h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .pagination {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .pagination li {
+            display: inline-block;
+        }
+        .pagination a {
+            padding: 5px 10px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Orders</h1>
 
-{% block title %}Orders{% endblock %}
+        {% if orders %}
+            <div class="orders-list">
+                {% for order in orders %}
+                    <div class="order-card">
+                        <h3>Order #{{ order.id }}</h3>
+                        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                        <p><strong>Created:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+                        <p><strong>Products:</strong> {{ order.products.count }}</p>
+                        <p><strong>Total:</strong> ${{ order.get_total_price }}</p>
+                        <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+                        <a href="{% url 'shopapp:order_detail' order.pk %}" class="btn">View Details</a>
+                    </div>
+                {% endfor %}
+            </div>
 
-{% block content %}
-<div class="container">
-    <h1>Orders</h1>
+            {% if is_paginated %}
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                        {% endif %}
 
-    {% if orders %}
-        <div class="orders-list">
-            {% for order in orders %}
-                <div class="order-card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
-                    <h3>Order #{{ order.id }}</h3>
-                    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
-                    <p><strong>Created:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
-                    <p><strong>Products:</strong> {{ order.products.count }}</p>
-                    <p><strong>Total:</strong> ${{ order.get_total_price }}</p>
-                    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
-                    <a href="{% url 'shopapp:order_detail' order.pk %}" class="btn btn-primary">View Details</a>
-                </div>
-            {% endfor %}
-        </div>
+                        <li>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
 
-        {% if is_paginated %}
-            <nav>
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-                    {% endif %}
-
-                    <li>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
-
-                    {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <p>You don't have any orders yet.</p>
         {% endif %}
-    {% else %}
-        <p>You don't have any orders yet.</p>
-    {% endif %}
-</div>
-{% endblock %}
+    </div>
+</body>
+</html>
