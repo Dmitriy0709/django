@@ -1,60 +1,43 @@
-{% extends 'shopapp/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}
-Orders List
-{% endblock %}
+{% block title %}Orders{% endblock %}
 
-{% block body %}
-<h1>Orders</h1>
+{% block content %}
+<div class="container">
+    <h1>Orders</h1>
 
-{% if orders %}
-    {% for order in orders %}
-        <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px;">
-            <h3>
-                <a href="{% url 'shopapp:order_detail' pk=order.pk %}">
-                    Order #{{ order.pk }}
-                </a>
-            </h3>
-
-            <p><strong>User:</strong>
-                {% if order.user.first_name %}
-                    {{ order.user.first_name }} {{ order.user.last_name }}
-                {% else %}
-                    {{ order.user.username }}
-                {% endif %}
-            </p>
-
-            <p><strong>Created:</strong> {{ order.created_at }}</p>
-
-            <p><strong>Delivery Address:</strong> {{ order.delivery_address|default:"Not specified" }}</p>
-
-            <p><strong>Promocode:</strong> {{ order.promocode|default:"None" }}</p>
-
-            <div>
-                <strong>Products:</strong>
-                {% if order.products.all %}
-                    <ul>
-                        {% for product in order.products.all %}
-                            <li>
-                                <a href="{% url 'shopapp:product_details' pk=product.pk %}">
-                                    {{ product.name }}
-                                </a>
-                                - ${{ product.price }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <em>No products in this order</em>
-                {% endif %}
-            </div>
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <div class="order-card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                    <h3>Order #{{ order.id }}</h3>
+                    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                    <p><strong>Created:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+                    <p><strong>Products:</strong> {{ order.products.count }}</p>
+                    <p><strong>Total:</strong> ${{ order.get_total_price }}</p>
+                    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+                    <a href="{% url 'shopapp:order_detail' order.pk %}" class="btn btn-primary">View Details</a>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
-{% else %}
-    <h3>No orders yet</h3>
-{% endif %}
 
-<p>
-    <a href="{% url 'shopapp:order_create' %}">Create a new order</a>
-</p>
+        {% if is_paginated %}
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
 
+                    <li>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>You don't have any orders yet.</p>
+    {% endif %}
+</div>
 {% endblock %}

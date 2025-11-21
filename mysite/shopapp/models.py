@@ -48,3 +48,51 @@ class Product(models.Model):
         if user.is_superuser:
             return True
         return user == self.created_by and user.has_perm('shopapp.can_delete_product')
+
+
+class Order(models.Model):
+    """
+    Модель заказа.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='orders',
+        help_text='Пользователь, который создал заказ'
+    )
+    products = models.ManyToManyField(
+        Product,
+        related_name='orders',
+        help_text='Продукты в заказе'
+    )
+    delivery_address = models.TextField()
+    promocode = models.CharField(max_length=50, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Order #{self.pk} by {self.user.username}"
+
+    def get_total_price(self):
+        """
+        Рассчитывает общую стоимость заказа.
+        """
+        return sum(product.price for product in self.products.all())

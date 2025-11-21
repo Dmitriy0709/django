@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import Http404
 
-from .models import Product
+from .models import Product, Order
 from .forms import ProductForm
 
 
@@ -21,7 +21,7 @@ class ProductListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
+        context['user'] = self.request.user
         return context
 
 
@@ -109,3 +109,30 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         raise Http404("You don't have permission to delete this product")
 
 
+class OrderListView(LoginRequiredMixin, ListView):
+    """
+    Представление для отображения списка заказов текущего пользователя.
+    """
+    model = Order
+    template_name = 'shopapp/order_list.html'
+    context_object_name = 'orders'
+    paginate_by = 10
+    login_url = 'myauth:login'
+
+    def get_queryset(self):
+        # Показываем только заказы текущего пользователя
+        return Order.objects.filter(user=self.request.user).prefetch_related('products')
+
+
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    """
+    Представление для отображения деталей заказа.
+    """
+    model = Order
+    template_name = 'shopapp/order_detail.html'
+    context_object_name = 'order'
+    login_url = 'myauth:login'
+
+    def get_queryset(self):
+        # Пользователь может видеть только свои заказы
+        return Order.objects.filter(user=self.request.user)

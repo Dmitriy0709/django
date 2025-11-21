@@ -1,66 +1,58 @@
-{% extends 'shopapp/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}
-Order #{{ order.pk }} Details
-{% endblock %}
+{% block title %}Order #{{ order.id }}{% endblock %}
 
-{% block body %}
-<h1>Order #{{ order.pk }} Details</h1>
+{% block content %}
+<div class="container">
+    <h1>Order #{{ order.id }}</h1>
 
-<div>
-    <h2>Order Information</h2>
-
-    <p><strong>User:</strong>
-        {% if order.user.first_name %}
-            {{ order.user.first_name }} {{ order.user.last_name }}
-        {% else %}
-            {{ order.user.username }}
+    <div class="order-details">
+        <h2>Order Information</h2>
+        <p><strong>Status:</strong> <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></p>
+        <p><strong>Created:</strong> {{ order.created_at|date:"Y-m-d H:i:s" }}</p>
+        <p><strong>Updated:</strong> {{ order.updated_at|date:"Y-m-d H:i:s" }}</p>
+        <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+        {% if order.promocode %}
+            <p><strong>Promo Code:</strong> {{ order.promocode }}</p>
         {% endif %}
-    </p>
+    </div>
 
-    <p><strong>Created:</strong> {{ order.created_at }}</p>
+    <div class="order-products" style="margin-top: 30px;">
+        <h2>Products</h2>
+        {% if order.products.all %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f5f5f5;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Product</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Description</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in order.products.all %}
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <a href="{% url 'shopapp:product_detail' product.pk %}">{{ product.name }}</a>
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ product.description|truncatewords:10 }}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${{ product.price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #f9f9f9;">
+                        <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right;">Total:</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${{ order.get_total_price }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        {% else %}
+            <p>No products in this order.</p>
+        {% endif %}
+    </div>
 
-    <p><strong>Delivery Address:</strong> {{ order.delivery_address|default:"Not specified" }}</p>
-
-    <p><strong>Promocode:</strong> {{ order.promocode|default:"None" }}</p>
+    <div style="margin-top: 20px;">
+        <a href="{% url 'shopapp:order_list' %}" class="btn btn-secondary">Back to Orders</a>
+    </div>
 </div>
-
-<div>
-    <h3>Products in this order:</h3>
-    {% if order.products.all %}
-        <ul>
-            {% for product in order.products.all %}
-                <li>
-                    <a href="{% url 'shopapp:product_details' pk=product.pk %}">
-                        {{ product.name }}
-                    </a>
-                    - ${{ product.price }}
-                    {% if product.discount %}
-                        ({{ product.discount }}% discount)
-                    {% endif %}
-                    <br>
-                    <small>{{ product.description|truncatewords:10 }}</small>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <p><strong>Total products:</strong> {{ order.products.count }}</p>
-    {% else %}
-        <p><em>No products in this order</em></p>
-    {% endif %}
-</div>
-
-<div>
-    <h3>Actions:</h3>
-    <p>
-        <a href="{% url 'shopapp:orders_list' %}">← Back to Orders List</a>
-    </p>
-    <p>
-        <a href="{% url 'shopapp:order_update' pk=order.pk %}">Update Order</a>
-    </p>
-    <p>
-        <a href="{% url 'shopapp:order_delete' pk=order.pk %}">Delete Order</a>
-    </p>
-</div>
-
 {% endblock %}

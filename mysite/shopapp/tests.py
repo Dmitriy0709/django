@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-from .models import Product
+from .models import Product, Order
 from .utils import add_two_numbers
 
 
@@ -97,3 +97,29 @@ class ProductsListViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Fixture Product 1")
         self.assertContains(response, "Fixture Product 2")
+
+
+class OrdersListViewTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.credentials = dict(username='orders_test_user', password='testpass123')
+        cls.user = User.objects.create_user(**cls.credentials)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.user.delete()
+        super().tearDownClass()
+
+    def setUp(self):
+        self.client.login(**self.credentials)
+
+    def test_orders_view(self):
+        response = self.client.get(reverse("shopapp:order_list"))
+        self.assertContains(response, "Orders")
+
+    def test_orders_view_not_authenticated(self):
+        self.client.logout()
+        response = self.client.get(reverse("shopapp:order_list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(str(settings.LOGIN_URL), response.url)
