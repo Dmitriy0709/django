@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.http import Http404
+from django.http import Http404, JsonResponse, HttpRequest
 from django.conf import settings
 
 from .models import Product, Order
@@ -137,3 +138,18 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         # Пользователь может видеть только свои заказы
         return Order.objects.filter(user=self.request.user)
+
+
+class ProductsDataExportView(View):
+    def get(self, request: HttpRequest) -> JsonResponse:
+        products = Product.objects.order_by("pk").all()
+        products_data = [
+            {
+                "pk": product.pk,
+                "name": product.name,
+                "price": product.price,
+                "archived": product.archived,
+            }
+            for product in products
+        ]
+        return JsonResponse({"products": products_data})

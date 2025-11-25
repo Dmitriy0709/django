@@ -123,3 +123,31 @@ class OrdersListViewTestCase(TestCase):
         response = self.client.get(reverse("shopapp:order_list"))
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(settings.LOGIN_URL), response.url)
+
+
+class ProductExportTestCase(TestCase):
+    fixtures = [
+        'products-fixture.json',
+    ]
+
+    def test_get_products_view(self):
+        response = self.client.get(
+            reverse("shopapp:products-export"),
+        )
+        self.assertEqual(response.status_code, 200)
+        products = Product.objects.order_by("pk").all()
+        expected_data = [
+            {
+                "pk": product.pk,
+                "name": product.name,
+                "price": str(product.price),
+                "archived": product.archived,
+            }
+            for product in products
+        ]
+        products_data = response.json()
+        self.assertEqual(
+            products_data["products"],
+            expected_data,
+        )
+
