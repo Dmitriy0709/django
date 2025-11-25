@@ -87,9 +87,7 @@ class Order(models.Model):
         verbose_name = 'Order'
         verbose_name_plural = 'Orders'
         ordering = ['-created_at']
-        permissions = [
-            ('view_order', 'Can view order'),
-        ]
+        # НЕ добавляем view_order - Django создает его автоматически
 
     def __str__(self):
         return f"Order #{self.pk} by {self.user.username}"
