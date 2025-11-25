@@ -151,3 +151,149 @@ class ProductExportTestCase(TestCase):
             expected_data,
         )
 
+
+class OrderDetailViewTestCase(TestCase):
+    """
+    Тест для OrderDetailView.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Создаем пользователя
+        cls.user = User.objects.create_user(
+            username='order_detail_user',
+            password='testpass123'
+        )
+        # Добавляем разрешение на просмотр заказа
+        content_type = ContentType.objects.get_for_model(Order)
+        permission = Permission.objects.get(
+            codename='view_order',
+            content_type=content_type,
+        )
+        cls.user.user_permissions.add(permission)
+
+        # Создаем пользователя для продуктов
+        cls.product_creator = User.objects.create_user(
+            username='product_creator',
+            password='testpass123'
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.user.delete()
+        cls.product_creator.delete()
+        super().tearDownClass()
+
+    def setUp(self):
+        # Вход пользователя
+        self.client.login(username='order_detail_user', password='testpass123')
+
+        # Создаем продукты для заказа
+        self.product1 = Product.objects.create(
+            name="Test Product 1",
+            description="Description 1",
+            price="100.00",
+            created_by=self.product_creator
+        )
+        self.product2 = Product.objects.create(
+            name="Test Product 2",
+            description="Description 2",
+            price="200.00",
+            created_by=self.product_creator
+        )
+
+        # Создаем заказ
+        self.order = Order.objects.create(
+            user=self.user,
+            delivery_address="123 Test Street, Test City",
+            promocode="TESTCODE2024"
+        )
+        self.order.products.add(self.product1, self.product2)
+
+    def tearDown(self):
+        # Удаляем заказ и продукты после теста
+        self.order.delete()
+        self.product1.delete()
+        self.product2.delete()
+
+    def test_order_details(self):
+        """
+        Проверка получения деталей заказа.
+        """
+        response = self.client.get(
+            reverse("shopapp:order_detail", kwargs={"pk": self.order.pk})
+        )
+
+        # Проверяем статус ответа
+        self.assertEqual(response.status_code, 200)
+
+        # Проверяем, что в теле ответа есть адрес заказа
+        self.assertContains(response, self.order.delivery_address)
+
+        # Проверяем, что в теле ответа есть промокод
+        self.assertContains(response, self.order.promocode)
+
+        # Проверяем, что в контексте тот же заказ (по первичному ключу)
+        self.assertEqual(response.context['order'].pk, self.order.pk)
+
+
+class OrdersExportTestCase(TestCase):
+    """
+    Тест для OrdersExportView.
+    """
+    fixtures = [
+        'orders-export-fixture.json',
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Создаем пользователя с is_staff=True
+        cls.user = User.objects.create_user(
+            username='staff_user',
+            password='testpass123',
+            is_staff=True
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.user.delete()
+        super().tearDownClass()
+
+    def setUp(self):
+        # Вход пользователя
+        self.client.login(username='staff_user', password='testpass123')
+
+    def test_get_orders_export(self):
+        """
+        Проверка экспорта заказов.
+        """
+        response = self.client.get(reverse("shopapp:orders-export"))
+
+        # Проверяем статус кода
+        self.assertEqual(response.status_code, 200)
+
+        # Получаем данные из ответа
+        orders_data = response.json()
+
+        # Проверяем структуру ответа
+        self.assertIn('orders', orders_data)
+
+        # Получаем все заказы из базы данных
+        orders = Order.objects.select_related('user').prefetch_related('products').order_by('pk')
+
+        # Формируем ожидаемые данные
+        expected_data = [
+            {
+                'id': order.pk,
+                'delivery_address': order.delivery_address,
+                'promocode': order.promocode,
+                'user_id': order.user.pk,
+                'products': [product.pk for product in order.products.all()],
+            }
+            for order in orders
+        ]
+
+        # Проверяем, что данные совпадают
+        self.assertEqual(orders_data['orders'], expected_data)

@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views import View
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.http import Http404, JsonResponse, HttpRequest
+from django.http import Http404, JsonResponse
 from django.conf import settings
+from django.contrib.auth.decorators import user_passes_test
+from django.utils.decorators import method_decorator
 
 from .models import Product, Order
 from .forms import ProductForm
@@ -140,16 +141,52 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         return Order.objects.filter(user=self.request.user)
 
 
-class ProductsDataExportView(View):
-    def get(self, request: HttpRequest) -> JsonResponse:
-        products = Product.objects.order_by("pk").all()
+@method_decorator(user_passes_test(lambda user: user.is_staff), name='dispatch')
+class OrdersExportView(ListView):
+    """
+    Представление для экспорта всех заказов в JSON.
+    Доступ только для is_staff пользователей.
+    """
+    model = Order
+
+    def get_queryset(self):
+        # Получаем все заказы с подгрузкой пользователей и продуктов
+        return Order.objects.select_related('user').prefetch_related('products').order_by('pk')
+
+    def render_to_response(self, context, **response_kwargs):
+        orders = self.get_queryset()
+
+        orders_data = [
+            {
+                'id': order.pk,
+                'delivery_address': order.delivery_address,
+                'promocode': order.promocode,
+                'user_id': order.user.pk,
+                'products': [product.pk for product in order.products.all()],
+            }
+            for order in orders
+        ]
+
+        return JsonResponse({'orders': orders_data})
+
+
+class ProductsExportView(ListView):
+    """
+    Представление для экспорта всех продуктов в JSON.
+    """
+    model = Product
+
+    def render_to_response(self, context, **response_kwargs):
+        products = Product.objects.order_by('pk').all()
+
         products_data = [
             {
-                "pk": product.pk,
-                "name": product.name,
-                "price": product.price,
-                "archived": product.archived,
+                'pk': product.pk,
+                'name': product.name,
+                'price': str(product.price),
+                'archived': product.archived,
             }
             for product in products
         ]
-        return JsonResponse({"products": products_data})
+
+        return JsonResponse({'products': products_data})
