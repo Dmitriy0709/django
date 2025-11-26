@@ -2,6 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+def product_preview_directory_path(instance: "Product", filename: str) -> str:
+    return "products/product_{pk}/preview/{filename}".format(
+        pk=instance.pk,
+        filename=filename,
+    )
+
 class Product(models.Model):
     """
     Модель продукта с связью на пользователя.
@@ -18,6 +24,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
+    preview = models.ImageField(null=True, blank=True, upload_to=product_preview_directory_path)
 
     class Meta:
         verbose_name = 'Product'
@@ -82,6 +89,7 @@ class Order(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    receipt = models.FileField(null=True, upload_to='orders/receipts/')
 
     class Meta:
         verbose_name = 'Order'
