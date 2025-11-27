@@ -32,7 +32,8 @@ class ProductDetailView(DetailView):
     """
     Представление для отображения деталей продукта.
     """
-    model = Product
+    #model = Product
+    queryset = Product.objects.prefetch_related("images")
     template_name = 'shopapp/product_detail.html'
     context_object_name = 'product'
 
