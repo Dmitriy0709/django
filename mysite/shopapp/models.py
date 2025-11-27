@@ -57,6 +57,19 @@ class Product(models.Model):
         return user == self.created_by and user.has_perm('shopapp.can_delete_product')
 
 
+def product_images_directory_path(instance: "ProductImage", filename: str) -> str:
+    return "products/product_{pk}/images/{filename}".format(
+        pk=instance.product.pk,
+        filename=filename,
+    )
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to=product_images_directory_path)
+    description = models.CharField(max_length=200, null=False, blank=True)
+
+
 class Order(models.Model):
     """
     Модель заказа.
