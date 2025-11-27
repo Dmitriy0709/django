@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.decorators import method_decorator
 
-from .models import Product, Order
+from .models import Product, Order, ProductImage
 from .forms import ProductForm
 
 
@@ -91,6 +91,15 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edit Product'
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        for image in form.files.getlist("images"):
+            ProductImage.objects.create(
+                product=self.object,
+                image=image,
+            )
+        return response
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
