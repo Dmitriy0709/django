@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Product, Order
+from .models import Product, Order, ProductImage
 from .admin_mixins import ExportAsCSVMixin
+
+
+class ProductInline(admin.StackedInline):
+    model = ProductImage
 
 
 @admin.register(Product)
