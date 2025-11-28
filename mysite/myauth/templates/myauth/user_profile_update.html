@@ -1,0 +1,50 @@
+{% extends 'myauth/base.html' %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h3 class="mb-0">Редактирование профиля: {{ user_profile.username }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if user_profile.profile.avatar %}
+                        <div class="text-center mb-4">
+                            <img src="{{ user_profile.profile.avatar.url }}"
+                                 alt="{{ user_profile.username }}"
+                                 class="img-fluid rounded-circle"
+                                 style="max-width: 150px; max-height: 150px;">
+                            <p class="mt-2 text-muted">Текущая аватарка</p>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            {{ form.avatar.label_tag }}
+                            {{ form.avatar }}
+                            {% if form.avatar.errors %}
+                                <div class="text-danger">{{ form.avatar.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Выберите новое изображение для замены текущей аватарки
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Обновить аватарку</button>
+                            <a href="{% url 'myauth:user-detail' user_profile.pk %}" class="btn btn-secondary">
+                                Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
