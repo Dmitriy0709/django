@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
-from django.views.generic import FormView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import FormView, ListView, DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.http import Http404, JsonResponse, HttpRequest
 from django.views import View
+from django.contrib.auth.models import User
 
-from .forms import UserRegistrationForm, ProfileUpdateForm
+from .forms import UserRegistrationForm, ProfileUpdateForm, AvatarUpdateForm
 from .models import Profile
 
 
@@ -19,7 +21,7 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
-        return reverse_lazy('index')
+        return reverse_lazy('myauth:about-me')
 
 
 class CustomLogoutView(LogoutView):
@@ -100,24 +102,101 @@ def get_session_view(request):
 
 
 @login_required(login_url='myauth:login')
-def profile_view(request):
+def about_me_view(request):
     """
-    Представление для просмотра и обновления профиля пользователя.
+    Представление для страницы about-me (профиль текущего пользователя).
+    Позволяет пользователю просматривать и обновлять свой профиль и аватарку.
     """
     profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        form = AvatarUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('myauth:profile')
+            return redirect('myauth:about-me')
     else:
-        form = ProfileUpdateForm(instance=profile)
+        form = AvatarUpdateForm(instance=profile)
 
-    return render(request, 'myauth/profile.html', {
+    return render(request, 'myauth/about-me.html', {
         'profile': profile,
         'form': form
     })
+
+
+class UserListView(ListView):
+    """
+    Представление для отображения списка всех пользователей.
+    """
+    model = User
+    template_name = 'myauth/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return User.objects.select_related('profile').all()
+
+
+class UserDetailView(DetailView):
+    """
+    Представление для отображения детальной информации о пользователе.
+    """
+    model = User
+    template_name = 'myauth/user_detail.html'
+    context_object_name = 'user_profile'
+
+    def get_object(self):
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        # Убедимся, что у пользователя есть профиль
+        Profile.objects.get_or_create(user=user)
+        return user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()
+        # Проверяем, может ли текущий пользователь редактировать этот профиль
+        can_edit = (
+                self.request.user.is_authenticated and
+                (self.request.user.is_staff or self.request.user == user)
+        )
+        context['can_edit'] = can_edit
+        return context
+
+
+class UserProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    """
+    Представление для обновления профиля пользователя.
+    Доступно только администраторам или владельцу профиля.
+    """
+    form_class = AvatarUpdateForm
+    template_name = 'myauth/user_profile_update.html'
+    login_url = 'myauth:login'
+
+    def test_func(self):
+        """
+        Проверка прав доступа:
+        - Администратор (is_staff) может редактировать любой профиль
+        - Обычный пользователь может редактировать только свой профиль
+        """
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        return self.request.user.is_staff or self.request.user == user
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        profile, created = Profile.objects.get_or_create(user=user)
+        kwargs['instance'] = profile
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        return redirect('myauth:user-detail', pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        context['user_profile'] = user
+        return context
+
 
 class FooBarView(View):
     def get(self, request: HttpRequest) -> JsonResponse:

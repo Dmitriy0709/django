@@ -14,13 +14,21 @@ from django.contrib.auth.views import (
 from . import views
 from .views import FooBarView
 
-app_name = 'accounts'  # ← ИЗМЕНИТЕ ЗДЕСЬ (было 'myauth', теперь 'accounts')
+app_name = 'myauth'  # ← ИСПРАВЛЕНО (было 'accounts')
 
 urlpatterns = [
     # Аутентификация
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('register/', views.RegisterView.as_view(), name='register'),
+
+    # Профиль текущего пользователя
+    path('about-me/', views.about_me_view, name='about-me'),
+
+    # Список пользователей и детали
+    path('users/', views.UserListView.as_view(), name='user-list'),
+    path('users/<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
+    path('users/<int:pk>/update/', views.UserProfileUpdateView.as_view(), name='user-profile-update'),
 
     # Cookies
     path('set-cookie/', views.set_cookie_view, name='set_cookie'),
@@ -29,9 +37,6 @@ urlpatterns = [
     # Session
     path('set-session/', views.set_session_view, name='set_session'),
     path('get-session/', views.get_session_view, name='get_session'),
-
-    # Профиль
-    path('profile/', views.profile_view, name='profile'),
 
     # Смена пароля
     path('password-change/', PasswordChangeView.as_view(

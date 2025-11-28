@@ -1,21 +1,64 @@
 {% extends 'myauth/base.html' %}
 
-{% block title %}
-    About me
+{% block title %}Мой профиль{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Мой профиль</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            {% if profile.avatar %}
+                                <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-fluid rounded-circle" style="max-width: 200px; max-height: 200px;">
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <p>У вас нет аватарки</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ user.username }}</h4>
+                            {% if user.first_name or user.last_name %}
+                                <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                            {% endif %}
+                            {% if user.email %}
+                                <p><strong>Email:</strong> {{ user.email }}</p>
+                            {% endif %}
+                            {% if profile.bio %}
+                                <p><strong>О себе:</strong></p>
+                                <p>{{ profile.bio }}</p>
+                            {% endif %}
+                            <p><small class="text-muted">Зарегистрирован: {{ user.date_joined|date:"d.m.Y" }}</small></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h4>Обновить аватарку</h4>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.avatar.label_tag }}
+                            {{ form.avatar }}
+                            {% if form.avatar.errors %}
+                                <div class="text-danger">{{ form.avatar.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Выберите изображение для аватарки</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Обновить аватарку</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="{% url 'myauth:user-list' %}" class="btn btn-secondary">Посмотреть всех пользователей</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-{% block body %}
-    <h1>User info</h1>
-    {% if user.is_authenticated %}
-        <h2>Detail</h2>
-        <p>Username: {{ user.username }}</p>
-        <p>First name: {{ user.first_name }}</p>
-        <p>Last name: {{ user.last_name }}</p>
-        <p>Email: {{ user.email }}</p>
-        <p>Bio: {{ user.profile.bio }}</p>
-    {% else %}
-        <h2>User is anonymous</h2>
-    {% endif %}
-
-{% endblock %}
-

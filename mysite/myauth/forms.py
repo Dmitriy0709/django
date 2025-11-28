@@ -30,7 +30,7 @@ class UserRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            if field != 'password1' and field != 'password2':
+            if field not in ['password1', 'password2']:
                 self.fields[field].widget.attrs.update({'class': 'form-control'})
 
     def clean_email(self):
@@ -58,4 +58,16 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ('bio', 'avatar')
         widgets = {
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+
+class AvatarUpdateForm(forms.ModelForm):
+    """
+    Форма для обновления только аватарки пользователя.
+    """
+    class Meta:
+        model = Profile
+        fields = ('avatar',)
+        widgets = {
+            'avatar': forms.FileInput(attrs={'class': 'form-control'}),
         }
