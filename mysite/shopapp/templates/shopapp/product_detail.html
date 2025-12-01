@@ -10,30 +10,41 @@
         <p>{{ product.description }}</p>
         <h4>Price: ${{ product.price }}</h4>
 
-        {% if user.is_superuser or product.created_by == user and perms.shopapp.can_edit_product %}
-            <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">Edit</a>
-        {% endif %}
-
-        {% if user.is_superuser or product.created_by == user and perms.shopapp.can_delete_product %}
-            <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">Delete</a>
-
         {% if product.preview %}
-            <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
+            <div class="mb-3">
+                <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}" class="img-fluid">
+            </div>
         {% endif %}
+
+        <div class="mb-3">
+            {% if user.is_superuser or product.created_by == user and perms.shopapp.can_edit_product %}
+                <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">Edit</a>
+            {% endif %}
+
+            {% if user.is_superuser or product.created_by == user and perms.shopapp.can_delete_product %}
+                <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">Delete</a>
+            {% endif %}
+        </div>
 
         <h3>Images:</h3>
-        <div>
+        <div class="row">
             {% for img in product.images.all %}
-                <div>
-                    <img src="{{ img.image.url }}" alt="{{ img.image.name }}">
-                    <div>{{ img.description }}</div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <img src="{{ img.image.url }}" alt="{{ img.description }}" class="card-img-top">
+                        <div class="card-body">
+                            <p class="card-text">{{ img.description }}</p>
+                        </div>
+                    </div>
                 </div>
             {% empty %}
-                <div>No images uploaded yet</div>
+                <div class="col-12">
+                    <p class="alert alert-info">No images uploaded yet</p>
+                </div>
             {% endfor %}
         </div>
 
-        <a href="{% url 'shopapp:product_list' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'shopapp:product_list' %}" class="btn btn-secondary mt-3">Back</a>
     </div>
 </div>
 {% endblock %}
