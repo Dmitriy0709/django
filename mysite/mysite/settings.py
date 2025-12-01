@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'requestdataapp.middlewares.setup_useragent_on_request_middleware',
     'requestdataapp.middlewares.CountRequestsMiddleware',
     #'requestdataapp.middlewares.ThrottleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'

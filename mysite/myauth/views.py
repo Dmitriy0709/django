@@ -7,16 +7,17 @@ from django.urls import reverse_lazy
 from django.http import Http404, JsonResponse, HttpRequest, HttpResponse
 from django.views import View
 from django.contrib.auth.models import User
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from .forms import UserRegistrationForm, ProfileUpdateForm, AvatarUpdateForm
 from .models import Profile
 
 
 class HelloView(View):
+    welcome_message = _("Hello world!")
     def get(self, request: HttpRequest) -> HttpResponse:
-        welcome_message = _("Hello world!")
-        return HttpResponse(f"<h1>{welcome_message}</h1>")
+        #welcome_message = _("Hello world!")
+        return HttpResponse(f"<h1>{self.welcome_message}</h1>")
 
 
 class CustomLoginView(LoginView):
