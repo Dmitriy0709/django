@@ -12,12 +12,13 @@ from django.contrib.auth.views import (
 )
 
 from . import views
-from .views import FooBarView
+from .views import FooBarView, HelloView
 
 app_name = 'accounts'  # ← ИЗМЕНЕНО с 'myauth' на 'accounts'
 
 urlpatterns = [
     # Аутентификация
+    path("hello/", HelloView.as_view(), name="hello"),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('register/', views.RegisterView.as_view(), name='register'),
