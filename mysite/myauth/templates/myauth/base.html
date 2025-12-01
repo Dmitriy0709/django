@@ -25,7 +25,7 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
+                            <a class="nav-link" href="{% url 'accounts:about-me' %}">{{ user.username }}</a>
                         </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">

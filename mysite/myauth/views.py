@@ -21,7 +21,7 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
-        return reverse_lazy('myauth:about-me')
+        return reverse_lazy('accounts:about-me')  # ← ИЗМЕНЕНО
 
 
 class CustomLogoutView(LogoutView):
@@ -38,7 +38,7 @@ class RegisterView(FormView):
     """
     form_class = UserRegistrationForm
     template_name = 'myauth/register.html'
-    success_url = reverse_lazy('myauth:login')
+    success_url = reverse_lazy('accounts:login')  # ← ИЗМЕНЕНО
 
     def form_valid(self, form):
         form.save()
@@ -50,7 +50,7 @@ class RegisterView(FormView):
         return context
 
 
-@login_required(login_url='myauth:login')
+@login_required(login_url='accounts:login')  # ← ИЗМЕНЕНО
 def set_cookie_view(request):
     """
     Представление для установки значения в cookies пользователя.
@@ -60,7 +60,7 @@ def set_cookie_view(request):
     return response
 
 
-@login_required(login_url='myauth:login')
+@login_required(login_url='accounts:login')  # ← ИЗМЕНЕНО
 def get_cookie_view(request):
     """
     Представление для чтения значений из cookies пользователя.
@@ -72,7 +72,7 @@ def get_cookie_view(request):
     })
 
 
-@login_required(login_url='myauth:login')
+@login_required(login_url='accounts:login')  # ← ИЗМЕНЕНО
 def set_session_view(request):
     """
     Представление для установки значения в session пользователя.
@@ -85,7 +85,7 @@ def set_session_view(request):
     return render(request, 'myauth/set_session.html')
 
 
-@login_required(login_url='myauth:login')
+@login_required(login_url='accounts:login')  # ← ИЗМЕНЕНО
 def get_session_view(request):
     """
     Представление для чтения значений из session пользователя.
@@ -101,7 +101,7 @@ def get_session_view(request):
     })
 
 
-@login_required(login_url='myauth:login')
+@login_required(login_url='accounts:login')  # ← ИЗМЕНЕНО
 def about_me_view(request):
     """
     Представление для страницы about-me (профиль текущего пользователя).
@@ -113,7 +113,7 @@ def about_me_view(request):
         form = AvatarUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('myauth:about-me')
+            return redirect('accounts:about-me')  # ← ИЗМЕНЕНО
     else:
         form = AvatarUpdateForm(instance=profile)
 
@@ -169,7 +169,7 @@ class UserProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     """
     form_class = AvatarUpdateForm
     template_name = 'myauth/user_profile_update.html'
-    login_url = 'myauth:login'
+    login_url = 'accounts:login'  # ← ИЗМЕНЕНО
 
     def test_func(self):
         """
@@ -189,7 +189,7 @@ class UserProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         form.save()
-        return redirect('myauth:user-detail', pk=self.kwargs['pk'])
+        return redirect('accounts:user-detail', pk=self.kwargs['pk'])  # ← ИЗМЕНЕНО
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

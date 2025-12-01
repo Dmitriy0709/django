@@ -14,7 +14,7 @@ from django.contrib.auth.views import (
 from . import views
 from .views import FooBarView
 
-app_name = 'myauth'  # ← ИСПРАВЛЕНО (было 'accounts')
+app_name = 'accounts'  # ← ИЗМЕНЕНО с 'myauth' на 'accounts'
 
 urlpatterns = [
     # Аутентификация
