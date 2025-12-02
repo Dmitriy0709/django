@@ -32,6 +32,7 @@ urlpatterns += i18n_patterns(
     path('shop/', include('shopapp.urls')),
     path('accounts/', include('myauth.urls')),
     path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
+    path('api/', include('myapipp,urls')),
 )
 
 if settings.DEBUG:
