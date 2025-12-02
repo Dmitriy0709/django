@@ -26,8 +26,8 @@ msgstr ""
 #, python-brace-format
 msgid "one product"
 msgid_plural "{count} products"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "One product"
+msgstr[1] "{count} products."
 
 #: mysite/settings.py:132
 msgid "English"
