@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-02 04:38+0000\n"
+"POT-Creation-Date: 2025-12-02 05:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,4 +35,26 @@ msgstr ""
 
 #: mysite/settings.py:133
 msgid "Russia"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_list.html:6
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Products list"
+msgstr "Products list"
+
+#: shopapp/templates/shopapp/product_list.html:10
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Products"
+msgstr "Products list"
+
+#: shopapp/templates/shopapp/product_list.html:25
+msgid "Price"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_list.html:26
+msgid "Created by"
 msgstr ""
