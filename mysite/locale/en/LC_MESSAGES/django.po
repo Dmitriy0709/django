@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-01 11:27+0000\n"
+"POT-Creation-Date: 2025-12-02 04:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,14 +17,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-#: myauth/views.py:18
+
+#: myauth/views.py:17
 msgid "Hello world!"
 msgstr ""
 
-#: mysite/settings.py:131
+#: myauth/views.py:23
+#, python-brace-format
+msgid "one product"
+msgid_plural "{count} products"
+msgstr[0] ""
+msgstr[1] ""
+
+#: mysite/settings.py:132
 msgid "English"
 msgstr ""
 
-#: mysite/settings.py:132
+#: mysite/settings.py:133
 msgid "Russia"
 msgstr ""
