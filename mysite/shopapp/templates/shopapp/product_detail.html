@@ -1,4 +1,5 @@
 {% extends "shopapp/base.html" %}
+{% load i18n %}
 
 {% block title %}{{ product.name }}{% endblock %}
 
@@ -6,9 +7,9 @@
 <div class="row">
     <div class="col-md-8">
         <h2>{{ product.name }}</h2>
-        <p class="text-muted">By {{ product.created_by.username }}</p>
+        <p class="text-muted">{% translate "By" %} {{ product.created_by.username }}</p>
         <p>{{ product.description }}</p>
-        <h4>Price: ${{ product.price }}</h4>
+        <h4>{% translate "Price" %}: ${{ product.price }}</h4>
 
         {% if product.preview %}
             <div class="mb-3">
@@ -18,16 +19,30 @@
 
         <div class="mb-3">
             {% if user.is_superuser or product.created_by == user and perms.shopapp.can_edit_product %}
-                <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'shopapp:product_edit' product.pk %}" class="btn btn-warning">{% translate "Edit" %}</a>
             {% endif %}
 
             {% if user.is_superuser or product.created_by == user and perms.shopapp.can_delete_product %}
-                <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">Delete</a>
+                <a href="{% url 'shopapp:product_delete' product.pk %}" class="btn btn-danger">{% translate "Delete" %}</a>
             {% endif %}
         </div>
 
-        <h3>Images:</h3>
-        <div class="row">
+        {% blocktranslate %}
+        <h3>Product Information</h3>
+        <p>This product was created by the user and can be edited by authorized users.</p>
+        {% endblocktranslate %}
+
+        <h3>{% translate "Images" %}:</h3>
+
+        {% with image_count=product.images.all.count %}
+            {% blocktranslate count counter=image_count %}
+                This product has {{ counter }} image available.
+            {% plural %}
+                This product has {{ counter }} images available.
+            {% endblocktranslate %}
+        {% endwith %}
+
+        <div class="row mt-3">
             {% for img in product.images.all %}
                 <div class="col-md-4 mb-3">
                     <div class="card">
@@ -39,12 +54,12 @@
                 </div>
             {% empty %}
                 <div class="col-12">
-                    <p class="alert alert-info">No images uploaded yet</p>
+                    <p class="alert alert-info">{% translate "No images uploaded yet" %}</p>
                 </div>
             {% endfor %}
         </div>
 
-        <a href="{% url 'shopapp:product_list' %}" class="btn btn-secondary mt-3">Back</a>
+        <a href="{% url 'shopapp:product_list' %}" class="btn btn-secondary mt-3">{% translate "Back to products list" %}</a>
     </div>
 </div>
 {% endblock %}

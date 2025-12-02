@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 
 def product_preview_directory_path(instance: "Product", filename: str) -> str:
@@ -19,7 +20,7 @@ class Product(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='products',
-        help_text='Пользователь, который создал этот продукт'
+        help_text=_('User who created this product')
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,8 +28,8 @@ class Product(models.Model):
     preview = models.ImageField(null=True, blank=True, upload_to=product_preview_directory_path)
 
     class Meta:
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
+        verbose_name = _('Product')
+        verbose_name_plural = _('Products')
         ordering = ['id']
         permissions = [
             ('can_create_product', 'Can create product'),
@@ -75,23 +76,23 @@ class Order(models.Model):
     Модель заказа.
     """
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-        ('cancelled', 'Cancelled'),
+        ('pending', _('Pending')),
+        ('processing', _('Processing')),
+        ('shipped', _('Shipped')),
+        ('delivered', _('Delivered')),
+        ('cancelled', _('Cancelled')),
     ]
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='orders',
-        help_text='Пользователь, который создал заказ'
+        help_text=_('User who created the order')
     )
     products = models.ManyToManyField(
         Product,
         related_name='orders',
-        help_text='Продукты в заказе'
+        help_text=_('Products in the order')
     )
     delivery_address = models.TextField()
     promocode = models.CharField(max_length=50, blank=True)
@@ -105,10 +106,9 @@ class Order(models.Model):
     receipt = models.FileField(null=True, upload_to='orders/receipts/')
 
     class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+        verbose_name = _('Order')
+        verbose_name_plural = _('Orders')
         ordering = ['-created_at']
-        # НЕ добавляем view_order - Django создает его автоматически
 
     def __str__(self):
         return f"Order #{self.pk} by {self.user.username}"

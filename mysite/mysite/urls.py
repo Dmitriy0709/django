@@ -21,16 +21,15 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.conf.urls.i18n import i18n_patterns
 
+# URL без интернационализации
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    #path('shop/', include('shopapp.urls')),
     path('req/', include('requestdataapp.urls')),
-    #path('accounts/', include('myauth.urls')),
-    #path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
 ]
 
+# URL с интернационализацией (admin и shopapp)
 urlpatterns += i18n_patterns(
-path('shop/', include('shopapp.urls')),
+    path('admin/', admin.site.urls),
+    path('shop/', include('shopapp.urls')),
     path('accounts/', include('myauth.urls')),
     path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
 )

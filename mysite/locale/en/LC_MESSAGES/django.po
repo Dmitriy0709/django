@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-02 08:27+0000\n"
+"POT-Creation-Date: 2025-12-02 09:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,18 +37,122 @@ msgstr ""
 msgid "Russia"
 msgstr ""
 
+#: shopapp/models.py:23
+msgid "User who created this product"
+msgstr ""
+
+#: shopapp/models.py:31
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Product"
+msgstr "Products list"
+
+#: shopapp/models.py:32 shopapp/templates/shopapp/product_list.html:10
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Products"
+msgstr "Products list"
+
+#: shopapp/models.py:79
+msgid "Pending"
+msgstr ""
+
+#: shopapp/models.py:80
+msgid "Processing"
+msgstr ""
+
+#: shopapp/models.py:81
+msgid "Shipped"
+msgstr ""
+
+#: shopapp/models.py:82
+msgid "Delivered"
+msgstr ""
+
+#: shopapp/models.py:83
+msgid "Cancelled"
+msgstr ""
+
+#: shopapp/models.py:90
+msgid "User who created the order"
+msgstr ""
+
+#: shopapp/models.py:95
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Products in the order"
+msgstr "Products list"
+
+#: shopapp/models.py:109
+msgid "Order"
+msgstr ""
+
+#: shopapp/models.py:110
+msgid "Orders"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:10
+msgid "By"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:12
+#: shopapp/templates/shopapp/product_list.html:32
+msgid "Price"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:22
+msgid "Edit"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:26
+msgid "Delete"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:30
+msgid ""
+"\n"
+"        <h3>Product Information</h3>\n"
+"        <p>This product was created by the user and can be edited by "
+"authorized users.</p>\n"
+"        "
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:35
+msgid "Images"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:38
+#, python-format
+msgid ""
+"\n"
+"                This product has %(counter)s image available.\n"
+"            "
+msgid_plural ""
+"\n"
+"                This product has %(counter)s images available.\n"
+"            "
+msgstr[0] ""
+msgstr[1] ""
+
+#: shopapp/templates/shopapp/product_detail.html:57
+msgid "No images uploaded yet"
+msgstr ""
+
+#: shopapp/templates/shopapp/product_detail.html:62
+#, fuzzy
+#| msgid "one product"
+#| msgid_plural "{count} products"
+msgid "Back to products list"
+msgstr "Products list"
+
 #: shopapp/templates/shopapp/product_list.html:6
 #, fuzzy
 #| msgid "one product"
 #| msgid_plural "{count} products"
 msgid "Products list"
-msgstr "Products list"
-
-#: shopapp/templates/shopapp/product_list.html:10
-#, fuzzy
-#| msgid "one product"
-#| msgid_plural "{count} products"
-msgid "Products"
 msgstr "Products list"
 
 #: shopapp/templates/shopapp/product_list.html:14
@@ -63,10 +167,6 @@ msgid_plural ""
 "        "
 msgstr[0] ""
 msgstr[1] ""
-
-#: shopapp/templates/shopapp/product_list.html:32
-msgid "Price"
-msgstr ""
 
 #: shopapp/templates/shopapp/product_list.html:33
 msgid "Created by"
