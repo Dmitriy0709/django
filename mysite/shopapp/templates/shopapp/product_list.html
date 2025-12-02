@@ -10,6 +10,13 @@
 <h2>{% translate 'Products' %}</h2>
 
 {% if user.is_authenticated and perms.shopapp.can_create_product %}
+    <div>
+        {% blocktranslate count product_count=products|length %}
+            There is only one product.
+            {% plural %}
+            There are {{ product_count }} products.
+        {% endblocktranslate %}
+    </div>
     <div class="mb-4">
         <a href="{% url 'shopapp:product_create' %}" class="btn btn-primary">Create New Product</a>
     </div>
