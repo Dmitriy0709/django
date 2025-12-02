@@ -156,7 +156,7 @@ LOGIN_URL = reverse_lazy("accounts:login")  # ← ИЗМЕНЕНО
 
 
 
-REST_FRAMEWORKS = {
+REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
