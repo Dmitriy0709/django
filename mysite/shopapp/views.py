@@ -8,9 +8,16 @@ from django.http import Http404, JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.decorators import method_decorator
+from rest_framework.viewsets import ModelViewSet
 
 from .models import Product, Order, ProductImage
 from .forms import ProductForm
+from .serializers import ProductSerializer
+
+
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 
 class ProductListView(ListView):
