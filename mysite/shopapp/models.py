@@ -11,7 +11,10 @@ def product_preview_directory_path(instance: "Product", filename: str) -> str:
 
 class Product(models.Model):
     """
-    Модель продукта с связью на пользователя.
+    Модель Product представляет товар.
+    который можно продавать в интернет магазине.
+
+    Заказы тут:model:shopapp.Order
     """
     name = models.CharField(max_length=100)
     description = models.TextField()
