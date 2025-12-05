@@ -21,6 +21,8 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.conf.urls.i18n import i18n_patterns
 
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 # URL без интернационализации
 urlpatterns = [
     path('req/', include('requestdataapp.urls')),
@@ -33,6 +35,9 @@ urlpatterns += i18n_patterns(
     path('shop/', include('shopapp.urls')),
     path('accounts/', include('myauth.urls')),
     path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagegr', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
+    path('api/schema/redoc', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/', include('myapipp.urls')),
 )
 
