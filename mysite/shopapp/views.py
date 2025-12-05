@@ -11,7 +11,7 @@ from django.core.cache import cache
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .models import Product, Order
 from .forms import ProductForm
@@ -58,6 +58,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Get one product by ID",
         description="Retrieve product, returns 404 if not found",
+        responses={
+            200: ProductSerializer,
+            400: OpenApiResponse(description="Empty response, product by id no found")
+        }
     )
     def retrieve(self, *args, **kwargs):
         return super().retrieve(*args, **kwargs)
