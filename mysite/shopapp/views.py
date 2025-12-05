@@ -11,6 +11,7 @@ from django.core.cache import cache
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 
 from .models import Product, Order
 from .forms import ProductForm
@@ -21,6 +22,7 @@ from .serializers import ProductSerializer, OrderSerializer
 # REST API ViewSets
 # ============================================
 
+@extend_schema(description="Product views CRUD")
 class ProductViewSet(viewsets.ModelViewSet):
     """
     ViewSet для работы с продуктами через API.
@@ -52,6 +54,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     # Поля для сортировки
     ordering_fields = ['name', 'price', 'created_at']
     ordering = ['id']  # Сортировка по умолчанию
+    
+    @extend_schema(
+        summary="Get one product by ID",
+        description="Retrieve product, returns 404 if not found",
+    )
+    def retrieve(self, *args, **kwargs):
+        return super().retrieve(*args, **kwargs)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
