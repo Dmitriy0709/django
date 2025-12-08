@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import logging
 from pathlib import Path
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -184,24 +183,38 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
+# Logging configuration
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
     'filters': {
         'require_debug_true': {
-            '()': 'django.utils.log.RequiredDebugTrue',
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: DEBUG,
         },
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'filters': ['require_debug_true'],
         },
     },
     'loggers': {
         'django.db.backends': {
+            'handlers': ['console'],
             'level': 'DEBUG',
-            'handlers': ['console']
-        }
+            'propagate': False,
+        },
     },
 }
