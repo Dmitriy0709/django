@@ -11,7 +11,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         self.stdout.write("Create order with products")
-        user = User.objects.get(username="admin")
+        user = User.objects.get(username="dmitriy")
         products: Sequence[Product] = Product.objects.defer("description", "price", "created_at").all()
         order, created = Order.objects.get_or_create(
             delivery_address="ul Ivanova, d 8",
