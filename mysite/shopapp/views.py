@@ -1,17 +1,20 @@
 """
 Представления для приложения shopapp.
 """
-
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core.cache import cache
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 from .models import Product, Order
 from .forms import ProductForm
@@ -22,21 +25,69 @@ from .serializers import ProductSerializer, OrderSerializer
 # REST API ViewSets
 # ============================================
 
-@extend_schema(description="Product views CRUD")
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список всех продуктов",
+        description="Получить список всех продуктов с возможностью поиска и сортировки",
+        parameters=[
+            OpenApiParameter(
+                name='search',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Поиск по названию или описанию продукта',
+                examples=[
+                    OpenApiExample('Поиск ноутбука', value='laptop'),
+                    OpenApiExample('Поиск телефона', value='phone'),
+                ]
+            ),
+            OpenApiParameter(
+                name='ordering',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Сортировка результатов (name, price, created_at). Используйте "-" для обратной сортировки.',
+                examples=[
+                    OpenApiExample('По цене возрастание', value='price'),
+                    OpenApiExample('По цене убывание', value='-price'),
+                    OpenApiExample('По названию', value='name'),
+                ]
+            ),
+        ],
+        tags=['products'],
+    ),
+    retrieve=extend_schema(
+        summary="Детали продукта",
+        description="Получить подробную информацию о конкретном продукте",
+        tags=['products'],
+    ),
+    create=extend_schema(
+        summary="Создать продукт",
+        description="Создать новый продукт (требуется аутентификация)",
+        tags=['products'],
+    ),
+    update=extend_schema(
+        summary="Обновить продукт",
+        description="Обновить существующий продукт (требуется аутентификация)",
+        tags=['products'],
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить продукт",
+        description="Частично обновить существующий продукт (требуется аутентификация)",
+        tags=['products'],
+    ),
+    destroy=extend_schema(
+        summary="Удалить продукт",
+        description="Удалить продукт (требуется аутентификация)",
+        tags=['products'],
+    ),
+)
 class ProductViewSet(viewsets.ModelViewSet):
     """
     ViewSet для работы с продуктами через API.
 
-    Доступные фильтры:
-    - Поиск (search): name, description
-    - Сортировка (ordering): name, price, created_at
-
-    Примеры запросов:
-    - GET /api/products/ - список всех продуктов
-    - GET /api/products/?search=laptop - поиск по названию/описанию
-    - GET /api/products/?ordering=price - сортировка по цене (по возрастанию)
-    - GET /api/products/?ordering=-price - сортировка по цене (по убыванию)
-    - POST /api/products/ - создание продукта (требуется аутентификация)
+    Предоставляет CRUD операции для продуктов с поддержкой:
+    - Поиска по названию и описанию
+    - Сортировки по различным полям
+    - Пагинации результатов
     """
     queryset = Product.objects.select_related('created_by').prefetch_related('images').all()
     serializer_class = ProductSerializer
@@ -54,33 +105,84 @@ class ProductViewSet(viewsets.ModelViewSet):
     # Поля для сортировки
     ordering_fields = ['name', 'price', 'created_at']
     ordering = ['id']  # Сортировка по умолчанию
-    
-    @extend_schema(
-        summary="Get one product by ID",
-        description="Retrieve product, returns 404 if not found",
-        responses={
-            200: ProductSerializer,
-            400: OpenApiResponse(description="Empty response, product by id no found")
-        }
-    )
-    def retrieve(self, *args, **kwargs):
-        return super().retrieve(*args, **kwargs)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список всех заказов",
+        description="Получить список всех заказов с возможностью фильтрации и сортировки",
+        parameters=[
+            OpenApiParameter(
+                name='status',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Фильтр по статусу заказа',
+                enum=['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+                examples=[
+                    OpenApiExample('Ожидающие', value='pending'),
+                    OpenApiExample('Доставленные', value='delivered'),
+                ]
+            ),
+            OpenApiParameter(
+                name='user',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='Фильтр по ID пользователя',
+            ),
+            OpenApiParameter(
+                name='promocode',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Фильтр по промокоду',
+            ),
+            OpenApiParameter(
+                name='ordering',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Сортировка результатов (created_at, updated_at, status). Используйте "-" для обратной сортировки.',
+                examples=[
+                    OpenApiExample('Новые первыми', value='-created_at'),
+                    OpenApiExample('Старые первыми', value='created_at'),
+                ]
+            ),
+        ],
+        tags=['orders'],
+    ),
+    retrieve=extend_schema(
+        summary="Детали заказа",
+        description="Получить подробную информацию о конкретном заказе",
+        tags=['orders'],
+    ),
+    create=extend_schema(
+        summary="Создать заказ",
+        description="Создать новый заказ (требуется аутентификация)",
+        tags=['orders'],
+    ),
+    update=extend_schema(
+        summary="Обновить заказ",
+        description="Обновить существующий заказ (требуется аутентификация)",
+        tags=['orders'],
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить заказ",
+        description="Частично обновить существующий заказ (требуется аутентификация)",
+        tags=['orders'],
+    ),
+    destroy=extend_schema(
+        summary="Удалить заказ",
+        description="Удалить заказ (требуется аутентификация)",
+        tags=['orders'],
+    ),
+)
 class OrderViewSet(viewsets.ModelViewSet):
     """
     ViewSet для работы с заказами через API.
 
-    Доступные фильтры:
-    - Фильтрация (filter): status, user, promocode
-    - Сортировка (ordering): created_at, updated_at, status
-
-    Примеры запросов:
-    - GET /api/orders/ - список всех заказов
-    - GET /api/orders/?status=pending - фильтр по статусу
-    - GET /api/orders/?user=1 - фильтр по пользователю
-    - GET /api/orders/?ordering=-created_at - сортировка по дате создания (новые первыми)
-    - POST /api/orders/ - создание заказа (требуется аутентификация)
+    Предоставляет CRUD операции для заказов с поддержкой:
+    - Фильтрации по статусу, пользователю, промокоду
+    - Сортировки по различным полям
+    - Пагинации результатов
+    - Вычисления общей стоимости заказа
     """
     queryset = Order.objects.select_related('user').prefetch_related('products').all()
     serializer_class = OrderSerializer
@@ -206,7 +308,6 @@ class ProductsExportView(View):
     """
     Представление для экспорта продуктов в JSON.
     """
-
     def get(self, request: HttpRequest) -> JsonResponse:
         cache_key = 'products_export_data'
         products_data = cache.get(cache_key)
@@ -232,7 +333,6 @@ class OrdersExportView(View):
     """
     Представление для экспорта заказов в JSON.
     """
-
     def get(self, request: HttpRequest) -> JsonResponse:
         orders = Order.objects.select_related('user').prefetch_related('products').order_by('pk').all()
         orders_data = [
