@@ -24,7 +24,6 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
     SpectacularRedocView,
-    SpectacularYAMLAPIView,
 )
 
 # URL без интернационализации (документация API)
@@ -49,13 +48,6 @@ urlpatterns += [
         'api/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc',
-    ),
-
-    # OpenAPI schema (YAML) - бонус
-    path(
-        'api/schema.yaml/',
-        SpectacularYAMLAPIView.as_view(url_name='schema'),
-        name='schema-yaml',
     ),
 ]
 
