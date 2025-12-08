@@ -20,16 +20,43 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 from django.conf.urls.i18n import i18n_patterns
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+    SpectacularYAMLAPIView,
+)
 
-# URL без интернационализации
+# URL без интернационализации (документация API)
 urlpatterns = [
     path('req/', include('requestdataapp.urls')),
+]
 
-    # API Schema and Documentation (без интернационализации для удобства доступа)
+# API Schema and Documentation (все вместе, без интернационализации для удобства доступа)
+urlpatterns += [
+    # OpenAPI schema (JSON)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # Swagger UI (интерактивная документация)
+    path(
+        'api/docs/',
+        SpectacularSwaggerView.as_view(url_name='schema'),
+        name='swagger-ui',
+    ),
+
+    # ReDoc (альтернативная документация)
+    path(
+        'api/redoc/',
+        SpectacularRedocView.as_view(url_name='schema'),
+        name='redoc',
+    ),
+
+    # OpenAPI schema (YAML) - бонус
+    path(
+        'api/schema.yaml/',
+        SpectacularYAMLAPIView.as_view(url_name='schema'),
+        name='schema-yaml',
+    ),
 ]
 
 # URL с интернационализацией (admin и shopapp)
