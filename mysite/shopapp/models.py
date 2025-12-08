@@ -16,8 +16,8 @@ class Product(models.Model):
 
     Заказы тут:model:'shopapp.Order'
     """
-    name = models.CharField(max_length=100)
-    description = models.TextField()
+    name = models.CharField(max_length=100, db_index=True)
+    description = models.TextField(db_index=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     created_by = models.ForeignKey(
         User,
