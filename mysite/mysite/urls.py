@@ -56,8 +56,10 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('shop/', include('shopapp.urls')),
     path('accounts/', include('myauth.urls')),
+    path('blog/', include('blogapp.urls')),  # ← ДОБАВИТЬ
     path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
 )
+
 
 if settings.DEBUG:
     urlpatterns.extend(
