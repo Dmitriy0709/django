@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'shopapp.apps.ShopappConfig',
     'requestdataapp.apps.RequestdataappConfig',
     'myauth.apps.MyauthConfig',
+    'blogapp.apps.BlogappConfig',
 ]
 
 MIDDLEWARE = [
