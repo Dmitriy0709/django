@@ -1,0 +1,114 @@
+{% extends "shopapp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Blog Articles" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{% translate "Blog Articles" %}</h1>
+
+    {% if articles %}
+        <div class="row">
+            {% for article in articles %}
+                <div class="col-md-8 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Заголовок -->
+                            <h2 class="card-title">
+                                <a href="#" style="text-decoration: none; color: inherit;">
+                                    {{ article.title }}
+                                </a>
+                            </h2>
+
+                            <!-- Метаинформация -->
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <!-- Автор -->
+                                    <strong>{% translate "Author" %}:</strong>
+                                    <span class="badge bg-info">{{ article.author.name }}</span>
+
+                                    <!-- Категория -->
+                                    <strong class="ms-3">{% translate "Category" %}:</strong>
+                                    <span class="badge bg-primary">{{ article.category.name }}</span>
+
+                                    <!-- Дата публикации -->
+                                    <strong class="ms-3">{% translate "Published" %}:</strong>
+                                    <span>{{ article.pub_date|date:"d.m.Y H:i" }}</span>
+                                </small>
+                            </div>
+
+                            <!-- Теги -->
+                            {% if article.tags.all %}
+                                <div class="mb-3">
+                                    <strong>{% translate "Tags" %}:</strong>
+                                    {% for tag in article.tags.all %}
+                                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">
+                                    <small>{% translate "No tags" %}</small>
+                                </p>
+                            {% endif %}
+
+                            <!-- Описание (первые 150 символов) -->
+                            <p class="card-text text-muted">
+                                {{ article.content|truncatewords:30 }}
+                            </p>
+
+                            <a href="#" class="btn btn-primary btn-sm">
+                                {% translate "Read more" %}
+                            </a>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            {% translate "Last updated" %}: {{ article.updated_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">{% translate "First" %}</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                {% translate "Previous" %}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            {% translate "Page" %} {{ page_obj.number }} {% translate "of" %} {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                {% translate "Next" %}
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                {% translate "Last" %}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-info mt-4">
+            <p>{% translate "No articles found." %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
