@@ -1,7 +1,7 @@
 """
 Представления для приложения shopapp.
 """
-from django.shortcuts import render, get_object_or_404, redirect
+import logging
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
@@ -10,8 +10,7 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core.cache import cache
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.decorators import action
-from rest_framework.response import Response
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -20,6 +19,8 @@ from .models import Product, Order
 from .forms import ProductForm
 from .serializers import ProductSerializer, OrderSerializer
 
+
+log = logging.getLogger(__name__)
 
 # ============================================
 # REST API ViewSets

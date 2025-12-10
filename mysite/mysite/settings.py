@@ -185,6 +185,11 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Logging configuration
+
+LOGFILE_NAME = BASE_DIR / "log.txt"
+LOGFILE_SIZE = 1 * 1024 * 1024
+LOGFILE_COUNT = 3
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -210,10 +215,17 @@ LOGGING = {
             'formatter': 'simple',
             'filters': ['require_debug_true'],
         },
+        "logfile": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGFILE_NAME,
+            "maxBytes": LOGFILE_SIZE,
+            "backupCount": LOGFILE_COUNT,
+            "formatter": "verbose",
+        },
     },
     'loggers': {
         'django.db.backends': {
-            'handlers': ['console'],
+            'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
             'propagate': False,
         },

@@ -1,0 +1,1 @@
+[DEBUG] 2025-12-10 08:51:09,672 utils 10265 134970781435584 (0.001) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations"; args=(); alias=default
