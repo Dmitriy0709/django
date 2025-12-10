@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
+
+import debug_toolbar.middleware
+from django.conf.global_settings import INTERNAL_IPS
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
@@ -27,6 +30,9 @@ SECRET_KEY = 'django-insecure-qso%yq77se8&l8h4!m15noq9d@c(z!bbr9uc#%&4u@8+a$f(b5
 DEBUG = True
 
 ALLOWED_HOSTS = []
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -43,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
+    'debug_toolbar',
 
     # Local apps
     'shopapp.apps.ShopappConfig',
@@ -62,6 +69,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'requestdataapp.middlewares.setup_useragent_on_request_middleware',
     'requestdataapp.middlewares.CountRequestsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
