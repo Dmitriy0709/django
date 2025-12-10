@@ -10,9 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
-
-import debug_toolbar.middleware
-from django.conf.global_settings import INTERNAL_IPS
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
@@ -30,9 +27,6 @@ SECRET_KEY = 'django-insecure-qso%yq77se8&l8h4!m15noq9d@c(z!bbr9uc#%&4u@8+a$f(b5
 DEBUG = True
 
 ALLOWED_HOSTS = []
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
 
 
 # Application definition
@@ -49,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'debug_toolbar',
+    'debug_toolbar',  # ← ДОБАВИТЬ
 
     # Local apps
     'shopapp.apps.ShopappConfig',
@@ -69,7 +63,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'requestdataapp.middlewares.setup_useragent_on_request_middleware',
     'requestdataapp.middlewares.CountRequestsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',  # ← ДОБАВИТЬ (должен быть раньше других)
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -193,11 +187,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Logging configuration
-
-LOGFILE_NAME = BASE_DIR / "log.txt"
-LOGFILE_SIZE = 1 * 1024 * 1024
-LOGFILE_COUNT = 3
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -223,19 +212,18 @@ LOGGING = {
             'formatter': 'simple',
             'filters': ['require_debug_true'],
         },
-        "logfile": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": LOGFILE_NAME,
-            "maxBytes": LOGFILE_SIZE,
-            "backupCount": LOGFILE_COUNT,
-            "formatter": "verbose",
-        },
     },
     'loggers': {
         'django.db.backends': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
+# Django Debug Toolbar settings
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
+]
