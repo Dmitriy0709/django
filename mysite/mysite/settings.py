@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 from pathlib import Path
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-qso%yq77se8&l8h4!m15noq9d@c(z!bbr9uc#%&4u@8+a$f(b5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'debug_toolbar',  # ← ДОБАВИТЬ
+    'debug_toolbar',
 
     # Local apps
     'shopapp.apps.ShopappConfig',
@@ -61,9 +62,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'requestdataapp.middlewares.setup_useragent_on_request_middleware',
     'requestdataapp.middlewares.CountRequestsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',  # ← ДОБАВИТЬ (должен быть раньше других)
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -91,12 +92,26 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Если переменные окружения установлены, используем PostgreSQL, иначе SQLite
+if os.getenv('DATABASES_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DATABASES_NAME', 'django_db'),
+            'USER': os.getenv('DATABASES_USER', 'django_user'),
+            'PASSWORD': os.getenv('DATABASES_PASSWORD', 'django_password'),
+            'HOST': os.getenv('DATABASES_HOST', 'db'),
+            'PORT': os.getenv('DATABASES_PORT', '5432'),
+        }
     }
-}
+else:
+    # Локальная разработка - SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -144,6 +159,7 @@ LANGUAGES = [
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (uploaded by users)
 MEDIA_URL = '/media/'
