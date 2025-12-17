@@ -5,19 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-# Устанавливаем системные зависимости
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements.txt из РОДИТЕЛЬСКОЙ директории (django/)
-COPY requirements.txt /app/
+# Копируем requirements.txt из РОДИТЕЛЬСКОЙ папки (django/)
+COPY ../requirements.txt .
 
-# Устанавливаем зависимости Python
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь проект (mysite/)
-COPY mysite /app/
+# Копируем только содержимое mysite/ в /app/
+COPY . .
 
 EXPOSE 8000
 
