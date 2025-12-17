@@ -7,13 +7,13 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements.txt из РОДИТЕЛЬСКОЙ папки (django/)
-COPY ../requirements.txt .
+# Копируем requirements.txt из КОРНЯ (так как context = ../)
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем только содержимое mysite/ в /app/
-COPY . .
+# Копируем содержимое mysite/ в /app/
+COPY mysite /app/
 
 EXPOSE 8000
 
