@@ -20,8 +20,8 @@ services:
 
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: mysite/Dockerfile
     container_name: mysite_web
     command: >
       sh -c "python manage.py migrate &&
