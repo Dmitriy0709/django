@@ -5,17 +5,19 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-# Только PostgreSQL драйвер
+# Устанавливаем системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements
-COPY ../requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Копируем requirements.txt из РОДИТЕЛЬСКОЙ директории (django/)
+COPY requirements.txt /app/
 
-# Копируем проект
-COPY . .
+# Устанавливаем зависимости Python
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Копируем весь проект (mysite/)
+COPY mysite /app/
 
 EXPOSE 8000
 

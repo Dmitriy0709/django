@@ -28,3 +28,5 @@ uploads/
 media/
 static/
 node_modules/
+.git/
+.gitignore

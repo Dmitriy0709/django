@@ -3,6 +3,7 @@ version: '3.9'
 services:
   db:
     image: postgres:16-alpine
+    container_name: mysite_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -16,19 +17,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - mysite_network
 
   web:
-    build: .
+    build:
+      context: ../
+      dockerfile: mysite/Dockerfile
+    container_name: mysite_web
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
+      - ../:/app
     ports:
       - "8000:8000"
     environment:
       DEBUG: "True"
-      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,127.0.0.1:8000"
       DATABASES_HOST: db
       DATABASES_PORT: 5432
       DATABASES_NAME: django_db
@@ -37,6 +43,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - mysite_network
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  mysite_network:
+    driver: bridge
