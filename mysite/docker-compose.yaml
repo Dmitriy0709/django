@@ -42,5 +42,13 @@ services:
       db:
         condition: service_healthy
 
+
+  grafana:
+    image: grafana/grafana:9.2.15
+
+  loki:
+    image: grafana/loki:2.8.0
+
 volumes:
   postgres_data:
+
