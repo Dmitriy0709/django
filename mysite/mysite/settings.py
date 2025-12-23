@@ -219,10 +219,16 @@ LOGGING = {
         'verbose': {
             'format': '[{levelname}] {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
         'simple': {
             'format': '[{levelname}] {message}',
             'style': '{',
+        },
+        'json': {
+            '()': 'logging.Formatter',
+            'format': '{"level": "%(levelname)s", "time": "%(asctime)s", "module": "%(module)s", "message": "%(message)s"}',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     'filters': {
@@ -230,25 +236,69 @@ LOGGING = {
             '()': 'django.utils.log.CallbackFilter',
             'callback': lambda record: DEBUG,
         },
+        'require_debug_false': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: not DEBUG,
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'filters': ['require_debug_true'],
+            'level': 'DEBUG',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+            'level': 'INFO',
+        },
+        'db_console': {
+            'class': 'logging.StreamHandler',
             'formatter': 'simple',
             'filters': ['require_debug_true'],
+            'level': 'DEBUG',
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'django.db.backends': {
-            'handlers': ['console'],
+            'handlers': ['db_console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'mysite': {
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
 }
+
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
 
 # Django Debug Toolbar settings
 INTERNAL_IPS = [
     '127.0.0.1',
     'localhost',
+    '172.17.0.1',      # Docker host gateway
+    '172.18.0.1',      # Docker compose network gateway
 ]
