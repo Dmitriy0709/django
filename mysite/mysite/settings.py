@@ -14,6 +14,15 @@ from pathlib import Path
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://07a6b057f29759da15fe48cf05dbe220@o4509592585961472.ingest.de.sentry.io/4510583230234704",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
