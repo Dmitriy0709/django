@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - mysite-network
 
   web:
     build:
@@ -31,13 +33,17 @@ services:
     ports:
       - "8000:8000"
     logging:
-      driver: "loki"
+      driver: loki
       options:
-        loki-url: "http://localhost:3100/loki/api/v1/push"
+        loki-url: "http://loki:3100/loki/api/v1/push"
         loki-batch-size: "400"
+        loki-batch-timeout: "20s"
+        loki-retries: "5"
+        loki-max-retries: "20"
+        labels: "service=django,app=mysite"
     environment:
       DEBUG: "True"
-      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,web"
       DATABASES_HOST: db
       DATABASES_PORT: 5432
       DATABASES_NAME: django_db
@@ -46,21 +52,46 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
+      loki:
+        condition: service_started
+    networks:
+      - mysite-network
 
   grafana:
-    image: grafana/grafana:9.2.15
+    image: grafana/grafana:10.2.0
+    container_name: mysite_grafana
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_storage:/var/lib/grafana
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - loki
+    networks:
+      - mysite-network
 
   loki:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.9.3
+    container_name: mysite_loki
     ports:
       - "3100:3100"
+    volumes:
+      - loki_storage:/loki
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - mysite-network
 
 volumes:
   postgres_data:
+  grafana_storage:
+  loki_storage:
 
+networks:
+  mysite-network:
+    driver: bridge
