@@ -1,6 +1,10 @@
 from django.contrib import admin
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from django.urls import path
 from .models import Product, Order, ProductImage
 from .admin_mixins import ExportAsCSVMixin
+from .forms import CSVImportForm
 
 
 class ProductInline(admin.StackedInline):
@@ -17,6 +21,24 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
     def mark_as_archived(self, request, queryset):
         queryset.update(archived=True)
     mark_as_archived.short_description = 'Mark selected products as archived'
+
+    def import_csv(self, request: HttpRequest) -> HttpResponse:
+        form = CSVImportForm()
+        context = {
+            "firm": form,
+        }
+        return render(request, "admin/csv_form.html", context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        new_urls = [
+            path(
+                "import-products-csv/",
+                self.import_csv,
+                name="import_products_csv",
+            ),
+        ]
+        return new_urls + urls
 
 
 @admin.register(Order)
