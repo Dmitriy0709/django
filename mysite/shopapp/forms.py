@@ -14,3 +14,7 @@ class ProductForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
+
+
+class CSVImportForm(forms.Form):
+    csv_file = forms.FileField()
