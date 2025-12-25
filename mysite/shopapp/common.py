@@ -1,7 +1,7 @@
 from csv import DictReader
 from io import TextIOWrapper
 
-from mysite.shopapp.models import Product
+from .models import Product
 
 
 def save_csv_products(file ,encoding):
