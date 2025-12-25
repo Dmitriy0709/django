@@ -13,6 +13,7 @@ class ProductInline(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
+    change_list_template = "shopapp/products_changelist.html"
     list_display = ['id', 'name', 'price', 'created_by', 'created_at', 'archived']
     list_filter = ['archived', 'created_at']
     search_fields = ['name', 'description']
