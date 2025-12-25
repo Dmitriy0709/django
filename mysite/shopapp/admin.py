@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import path
-from werkzeug.utils import redirect
 
 from .models import Product, Order, ProductImage
 from .admin_mixins import ExportAsCSVMixin
@@ -26,6 +25,7 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
 
     def mark_as_archived(self, request, queryset):
         queryset.update(archived=True)
+
     mark_as_archived.short_description = 'Mark selected products as archived'
 
     def import_csv(self, request: HttpRequest) -> HttpResponse:
@@ -35,6 +35,7 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
                 "form": form,
             }
             return render(request, "admin/csv_form.html", context)
+
         form = CSVImportForm(request.POST, request.FILES)
         if not form.is_valid():
             context = {
@@ -48,12 +49,19 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
         )
         reader = DictReader(csv_file)
 
-        products = [
-            Product(**row)
-            for row in reader
-        ]
+        # 🔑 ИСПРАВЛЕНИЕ: Получи доступные поля модели
+        model_fields = {f.name for f in Product._meta.get_fields()}
+
+        products = []
+        for row in reader:
+            # Фильтруем: оставляем только поля которые есть в модели
+            filtered_row = {k: v for k, v in row.items() if k in model_fields}
+            # Добавляем обязательное поле created_by
+            filtered_row['created_by'] = request.user
+            products.append(Product(**filtered_row))
+
         Product.objects.bulk_create(products)
-        self.message_user(request, "data from CSV was imported")
+        self.message_user(request, f"Successfully imported {len(products)} products from CSV")
         return redirect("..")
 
     def get_urls(self):
@@ -78,4 +86,5 @@ class OrderAdmin(admin.ModelAdmin, ExportAsCSVMixin):
 
     def get_products_count(self, obj):
         return obj.products.count()
+
     get_products_count.short_description = 'Products Count'
