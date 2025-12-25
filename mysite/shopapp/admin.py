@@ -26,7 +26,7 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
     def import_csv(self, request: HttpRequest) -> HttpResponse:
         form = CSVImportForm()
         context = {
-            "firm": form,
+            "form": form,
         }
         return render(request, "admin/csv_form.html", context)
 
