@@ -42,22 +42,22 @@ class LatestArticlesFeed(Feed):
     description = "Updates on changes and addition blog articles"
 
     def link(self):
-        # ✅ ИСПРАВЛЕНО: Используйте правильное имя URL
+        # ✅ Верните URL списка статей
         return reverse("blogapp:article-list")
 
     def items(self):
         return (
             Article.objects.filter(
-                published_at__isnull=False
+                pub_date__isnull=False  # ✅ ИСПРАВЛЕНО: pub_date вместо published_at
             )
-            .order_by("-published_at")[:5]
+            .order_by("-pub_date")[:5]  # ✅ ИСПРАВЛЕНО: pub_date вместо published_at
         )
 
     def item_title(self, item: Article):
         return item.title
 
     def item_description(self, item: Article):
-        return item.body[:200]
+        return item.content[:200]  # ✅ ИЗМЕНЕНО: content вместо body
 
     def item_link(self, item: Article):
         return reverse("blogapp:article", kwargs={"pk": item.pk})
