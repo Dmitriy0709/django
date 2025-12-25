@@ -1,10 +1,20 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Статьи{% endblock %}
+{% block title %}{% trans "Articles" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Все статьи</h1>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{% trans "All Articles" %}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'blogapp:latest-feed' %}" class="btn btn-secondary">
+                📡 {% trans "RSS Feed" %}
+            </a>
+        </div>
+    </div>
 
     <div class="row">
         {% for article in articles %}
@@ -17,8 +27,8 @@
                         </a>
                     </h5>
                     <p class="card-text text-muted">
-                        Автор: {{ article.author.username }} |
-                        Дата: {{ article.pub_date|date:"d.m.Y H:i" }}
+                        {% trans "Author:" %} <strong>{{ article.author.get_full_name|default:article.author.username }}</strong>
+                        | {% trans "Date:" %} <strong>{{ article.pub_date|date:"d.m.Y H:i" }}</strong>
                     </p>
                     {% if article.category %}
                     <p>
@@ -26,54 +36,50 @@
                     </p>
                     {% endif %}
                     <p class="card-text">{{ article.content|truncatewords:50 }}</p>
-                    <a href="{% url 'blogapp:article' article.pk %}" class="btn btn-primary">
-                        Читать далее
+                    <a href="{% url 'blogapp:article' article.pk %}" class="btn btn-primary btn-sm">
+                        {% trans "Read more" %}
                     </a>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-md-8">
-            <p>Нет опубликованных статей.</p>
+            <div class="alert alert-info">
+                {% trans "No published articles yet." %}
+            </div>
         </div>
         {% endfor %}
     </div>
 
     <!-- Пагинация -->
     {% if is_paginated %}
-    <nav aria-label="Page navigation">
+    <nav aria-label="{% trans 'Page navigation' %}">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1">Первая</a>
+                <a class="page-link" href="?page=1">{% trans "First" %}</a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a>
             </li>
             {% endif %}
 
             <li class="page-item active">
                 <span class="page-link">
-                    {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                    {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
                 </span>
             </li>
 
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %}</a>
             </li>
             {% endif %}
         </ul>
     </nav>
     {% endif %}
-
-    <div class="mt-4">
-        <a href="{% url 'blogapp:latest-feed' %}" class="btn btn-secondary">
-            📡 RSS-лента
-        </a>
-    </div>
 </div>
 {% endblock %}

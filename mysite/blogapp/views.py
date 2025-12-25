@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.contrib.syndication.views import Feed
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from .models import Article
 
 
@@ -31,15 +32,15 @@ class ArticleDetailView(DetailView):
 
 class LatestArticlesFeed(Feed):
     """RSS-лента последних статей"""
-    title = "Последние статьи"
-    description = "Последние статьи из нашего блога"
+    title = _("Последние статьи")
+    description = _("Последние статьи из нашего блога")
 
     def link(self):
-        # Возвращает ссылку на страницу списка статей
-        return reverse("blogapp:articles")
+        # Используем статический путь для Feed link()
+        return "/blog/articles/"
 
     def items(self):
-        # Исправлено: используем 'pub_date' вместо 'published_at'
+        # ИСПРАВЛЕНО: используем 'pub_date' вместо 'published_at'
         return Article.objects.filter(
             pub_date__isnull=False
         ).order_by('-pub_date')[:5]
@@ -51,7 +52,7 @@ class LatestArticlesFeed(Feed):
         return item.content
 
     def item_link(self, item):
-        # Исправлено: используем правильное имя URL-паттерна 'article'
+        # ИСПРАВЛЕНО: используем правильное имя URL-паттерна 'article'
         return reverse("blogapp:article", kwargs={"pk": item.pk})
 
     def item_pubdate(self, item):

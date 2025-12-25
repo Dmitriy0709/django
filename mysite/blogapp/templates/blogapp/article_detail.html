@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ article.title }}{% endblock %}
 
@@ -8,38 +9,40 @@
         <div class="col-md-8">
             <article>
                 <h1>{{ article.title }}</h1>
-                
+
                 <div class="article-meta text-muted mb-4">
                     <small>
-                        Автор: <strong>{{ article.author.get_full_name|default:article.author.username }}</strong><br>
-                        Дата публикации: <strong>{{ article.pub_date|date:"d.m.Y H:i" }}</strong><br>
-                        Последнее обновление: <strong>{{ article.updated_at|date:"d.m.Y H:i" }}</strong>
+                        {% trans "Author:" %} <strong>{{ article.author.get_full_name|default:article.author.username }}</strong><br>
+                        {% trans "Published:" %} <strong>{{ article.pub_date|date:"d.m.Y H:i" }}</strong><br>
+                        {% trans "Updated:" %} <strong>{{ article.updated_at|date:"d.m.Y H:i" }}</strong>
                     </small>
                 </div>
-                
+
                 {% if article.category %}
                 <p>
                     <span class="badge bg-info mb-3">{{ article.category.name }}</span>
                 </p>
                 {% endif %}
-                
+
                 <div class="article-content">
                     {{ article.content|linebreaks }}
                 </div>
-                
+
                 {% if article.tags.all %}
                 <div class="mt-4">
-                    <h5>Теги:</h5>
+                    <h5>{% trans "Tags:" %}</h5>
                     {% for tag in article.tags.all %}
                     <span class="badge bg-secondary">{{ tag.name }}</span>
                     {% endfor %}
                 </div>
                 {% endif %}
             </article>
-            
+
+            <hr class="my-4">
+
             <div class="mt-4">
                 <a href="{% url 'blogapp:articles' %}" class="btn btn-secondary">
-                    ← Вернуться к статьям
+                    ← {% trans "Back to articles" %}
                 </a>
             </div>
         </div>
