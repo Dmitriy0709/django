@@ -1,66 +1,58 @@
-"""
-Представления для приложения blogapp.
-"""
+from django.shortcuts import render
+from django.views.generic import ListView, DetailView
 from django.contrib.syndication.views import Feed
-from django.views.generic import ListView
-from django.db.models import Prefetch
-from django.urls import reverse, reverse_lazy
-
+from django.urls import reverse
 from .models import Article
 
 
 class ArticleListView(ListView):
-    """
-    Представление для отображения списка всех статей с оптимизацией запросов.
-
-    Используется:
-    - select_related для подгрузки автора и категории (ForeignKey)
-    - prefetch_related для подгрузки тегов (ManyToMany)
-    - defer для исключения поля content из основного запроса
-    """
+    """Список всех статей"""
     model = Article
     template_name = 'blogapp/article_list.html'
     context_object_name = 'articles'
     paginate_by = 10
 
     def get_queryset(self):
-        """
-        Оптимизирует запрос к БД для избежания N+1 проблемы.
-        """
-        return Article.objects.select_related(
-            'author',  # Подгрузка автора (ForeignKey)
-            'category',  # Подгрузка категории (ForeignKey)
-        ).prefetch_related(
-            'tags',  # Подгрузка тегов (ManyToMany)
-        ).defer(
-            'content',  # Исключаем большое поле content из запроса
-        ).all()
+        return Article.objects.filter(
+            pub_date__isnull=False
+        ).order_by('-pub_date')
+
+
+class ArticleDetailView(DetailView):
+    """Детальный просмотр статьи"""
+    model = Article
+    template_name = 'blogapp/article_detail.html'
+    context_object_name = 'article'
+    pk_url_kwarg = 'pk'
+
+    def get_queryset(self):
+        return Article.objects.filter(pub_date__isnull=False)
 
 
 class LatestArticlesFeed(Feed):
-    title = "Blog articles (latest)"
-    description = "Updates on changes and addition blog articles"
+    """RSS-лента последних статей"""
+    title = "Последние статьи"
+    description = "Последние статьи из нашего блога"
 
     def link(self):
-        # ✅ Верните URL списка статей
-        return reverse("blogapp:article-list")
+        # Возвращает ссылку на страницу списка статей
+        return reverse("blogapp:articles")
 
     def items(self):
-        return (
-            Article.objects.filter(
-                pub_date__isnull=False
-            )
-            .order_by("-pub_date")[:5]
-        )
+        # Исправлено: используем 'pub_date' вместо 'published_at'
+        return Article.objects.filter(
+            pub_date__isnull=False
+        ).order_by('-pub_date')[:5]
 
-    def item_title(self, item: Article):
+    def item_title(self, item):
         return item.title
 
-    def item_description(self, item: Article):
-        return item.content[:200]
+    def item_description(self, item):
+        return item.content
 
-    def item_link(self, item: Article):
-        # ✅ ИСПРАВЛЕНО: используйте правильное имя URL
-        # Если у вас есть DetailView для статей, используйте его имя
-        # Если нет, просто верните ссылку на список статей
-        return reverse("blogapp:article-list")
+    def item_link(self, item):
+        # Исправлено: используем правильное имя URL-паттерна 'article'
+        return reverse("blogapp:article", kwargs={"pk": item.pk})
+
+    def item_pubdate(self, item):
+        return item.pub_date
