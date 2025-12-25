@@ -36,11 +36,9 @@ class LatestArticlesFeed(Feed):
     description = _("Последние статьи из нашего блога")
 
     def link(self):
-        # Статический путь для Feed link()
         return "/blog/articles/"
 
     def items(self):
-        # ИСПРАВЛЕНО: используем 'pub_date' вместо 'published_at'
         return Article.objects.filter(
             pub_date__isnull=False
         ).order_by('-pub_date')[:5]
@@ -50,17 +48,30 @@ class LatestArticlesFeed(Feed):
 
     def item_description(self, item):
         """Расширенное описание с автором и датой"""
-        author = item.author.get_full_name() or item.author.username
+        # Работает с обеими моделями: Author (name) и User (get_full_name)
+        author_name = None
+
+        # Сначала проверяем поле 'name' (для кастомной Author)
+        if hasattr(item.author, 'name'):
+            author_name = item.author.name
+        # Потом проверяем метод 'get_full_name' (для User)
+        elif hasattr(item.author, 'get_full_name'):
+            full_name = item.author.get_full_name()
+            if full_name:
+                author_name = full_name
+        # Если ничего не подошло, берём username
+        if not author_name:
+            author_name = getattr(item.author, 'username', 'Неизвестный автор')
+
         pub_date = item.pub_date.strftime('%d.%m.%Y %H:%M')
 
         return f"""
-        <p><strong>Автор:</strong> {author}</p>
+        <p><strong>Автор:</strong> {author_name}</p>
         <p><strong>Дата публикации:</strong> {pub_date}</p>
         <div>{item.content}</div>
         """
 
     def item_link(self, item):
-        # Используем правильное имя URL-паттерна 'article'
         return reverse("blogapp:article", kwargs={"pk": item.pk})
 
     def item_pubdate(self, item):
