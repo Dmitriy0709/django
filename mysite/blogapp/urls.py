@@ -12,3 +12,4 @@ urlpatterns = [
     path('articles/latest/feed/', views.LatestArticlesFeed(), name='latest-feed'),
 ]
 
+

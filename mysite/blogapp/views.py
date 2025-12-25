@@ -36,7 +36,7 @@ class LatestArticlesFeed(Feed):
     description = _("Последние статьи из нашего блога")
 
     def link(self):
-        # Используем статический путь для Feed link()
+        # Статический путь для Feed link()
         return "/blog/articles/"
 
     def items(self):
@@ -52,7 +52,7 @@ class LatestArticlesFeed(Feed):
         return item.content
 
     def item_link(self, item):
-        # ИСПРАВЛЕНО: используем правильное имя URL-паттерна 'article'
+        # Используем правильное имя URL-паттерна 'article'
         return reverse("blogapp:article", kwargs={"pk": item.pk})
 
     def item_pubdate(self, item):
