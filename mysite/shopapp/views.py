@@ -2,6 +2,10 @@
 Представления для приложения shopapp.
 """
 import logging
+from dataclasses import field
+from pickle import FALSE
+from csv import DictReader, DictWriter
+
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
@@ -10,6 +14,8 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core.cache import cache
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.request import Request
 
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
@@ -107,6 +113,27 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'price', 'created_at']
     ordering = ['id']  # Сортировка по умолчанию
 
+    @action(methods=["get"], detail=False)
+    def download_csv(self, request: Request):
+        response = HttpResponse(context_type="text/csv")
+        filename = "products-export.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        queryset = self.filter_queryset(self.get_queryset())
+        fields = [
+            "name",
+            "price",
+            "created_at",
+        ]
+        queryset = queryset.only(*fields)
+        writer = DictWriter(response, fieldnames=fields)
+        writer.writeheader()
+
+        for product in queryset:
+            writer.writerow({
+                field: getattr(product, field)
+                for field in fields
+            })
+        return response
 
 @extend_schema_view(
     list=extend_schema(
