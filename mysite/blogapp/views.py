@@ -49,7 +49,15 @@ class LatestArticlesFeed(Feed):
         return item.title
 
     def item_description(self, item):
-        return item.content
+        """Расширенное описание с автором и датой"""
+        author = item.author.get_full_name() or item.author.username
+        pub_date = item.pub_date.strftime('%d.%m.%Y %H:%M')
+
+        return f"""
+        <p><strong>Автор:</strong> {author}</p>
+        <p><strong>Дата публикации:</strong> {pub_date}</p>
+        <div>{item.content}</div>
+        """
 
     def item_link(self, item):
         # Используем правильное имя URL-паттерна 'article'
