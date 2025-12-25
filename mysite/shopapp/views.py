@@ -18,11 +18,14 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser
 
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from yaml import serialize
 
+from .common import save_csv_products
 from .models import Product, Order
 from .forms import ProductForm
 from .serializers import ProductSerializer, OrderSerializer
@@ -157,6 +160,19 @@ class ProductViewSet(viewsets.ModelViewSet):
                 'status': 'error',
                 'message': f'Ошибка: {str(e)}'
             }, status=400)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        parser_classes=[MultiPartParser],
+    )
+    def upload_csv(self, request: Request):
+        products = save_csv_products(
+            request.FILES["file"].file,
+            encoding=request.encoding,
+        )
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(
