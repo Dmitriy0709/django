@@ -48,16 +48,19 @@ class LatestArticlesFeed(Feed):
     def items(self):
         return (
             Article.objects.filter(
-                pub_date__isnull=False  # ✅ ИСПРАВЛЕНО: pub_date вместо published_at
+                pub_date__isnull=False
             )
-            .order_by("-pub_date")[:5]  # ✅ ИСПРАВЛЕНО: pub_date вместо published_at
+            .order_by("-pub_date")[:5]
         )
 
     def item_title(self, item: Article):
         return item.title
 
     def item_description(self, item: Article):
-        return item.content[:200]  # ✅ ИЗМЕНЕНО: content вместо body
+        return item.content[:200]
 
     def item_link(self, item: Article):
-        return reverse("blogapp:article", kwargs={"pk": item.pk})
+        # ✅ ИСПРАВЛЕНО: используйте правильное имя URL
+        # Если у вас есть DetailView для статей, используйте его имя
+        # Если нет, просто верните ссылку на список статей
+        return reverse("blogapp:article-list")
