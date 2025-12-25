@@ -115,7 +115,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(methods=["get"], detail=False)
     def download_csv(self, request: Request):
-        response = HttpResponse(context_type="text/csv")
+        response = HttpResponse(content_type="text/csv")
         filename = "products-export.csv"
         response["Content-Disposition"] = f"attachment; filename={filename}"
         queryset = self.filter_queryset(self.get_queryset())
