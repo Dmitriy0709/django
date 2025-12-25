@@ -16,6 +16,7 @@ from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.request import Request
+from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
@@ -115,25 +116,47 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(methods=["get"], detail=False)
     def download_csv(self, request: Request):
-        response = HttpResponse(content_type="text/csv")
-        filename = "products-export.csv"
-        response["Content-Disposition"] = f"attachment; filename={filename}"
-        queryset = self.filter_queryset(self.get_queryset())
-        fields = [
-            "name",
-            "price",
-            "created_at",
-        ]
-        queryset = queryset.only(*fields)
-        writer = DictWriter(response, fieldnames=fields)
-        writer.writeheader()
+        """Экспортирует продукты в CSV и сохраняет в папку проекта."""
+        try:
+            # Папка для экспорта
+            BASE_DIR = Path(__file__).resolve().parent.parent.parent
+            export_dir = BASE_DIR / 'uploads' / 'exports'
+            export_dir.mkdir(parents=True, exist_ok=True)
 
-        for product in queryset:
-            writer.writerow({
-                field: getattr(product, field)
-                for field in fields
+            # Имя файла с датой
+            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            filename = f"products-{timestamp}.csv"
+            filepath = export_dir / filename
+
+            # Получаем и экспортируем данные
+            queryset = self.filter_queryset(self.get_queryset())
+            fields = ["name", "price", "created_at"]
+
+            with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = DictWriter(csvfile, fieldnames=fields)
+                writer.writeheader()
+
+                for product in queryset:
+                    writer.writerow({
+                        field: getattr(product, field)
+                        for field in fields
+                    })
+
+            # Возвращаем JSON ответ
+            return Response({
+                'status': 'success',
+                'message': 'CSV сохранен в проект',
+                'filename': filename,
+                'path': str(filepath),
+                'rows': queryset.count(),
             })
-        return response
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Ошибка: {str(e)}'
+            }, status=400)
+
 
 @extend_schema_view(
     list=extend_schema(
