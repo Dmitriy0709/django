@@ -27,7 +27,7 @@
                         </a>
                     </h5>
                     <p class="card-text text-muted">
-                        {% trans "Author:" %} <strong>{{ article.author.get_full_name|default:article.author.username }}</strong>
+                        {% trans "Author:" %} <strong>{{ article.author.name }}</strong>
                         | {% trans "Date:" %} <strong>{{ article.pub_date|date:"d.m.Y H:i" }}</strong>
                     </p>
                     {% if article.category %}

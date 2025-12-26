@@ -12,7 +12,7 @@
 
                 <div class="article-meta text-muted mb-4">
                     <small>
-                        {% trans "Author:" %} <strong>{{ article.author.get_full_name|default:article.author.username }}</strong><br>
+                        {% trans "Author:" %} <strong>{{ article.author.name }}</strong><br>
                         {% trans "Published:" %} <strong>{{ article.pub_date|date:"d.m.Y H:i" }}</strong><br>
                         {% trans "Updated:" %} <strong>{{ article.updated_at|date:"d.m.Y H:i" }}</strong>
                     </small>
