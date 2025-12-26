@@ -10,5 +10,4 @@ class BlogSitemap(Sitemap):
         return Article.objects.filter(pub_date__isnull=False).order_by("-pub_date")
 
     def lastmod(self, obj: Article):
-        return obj.pk
-
+        return obj.updated_at
