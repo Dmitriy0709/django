@@ -7,7 +7,7 @@ class BlogSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return Article.objects.filter(publishwd_at_isnull=False).order_by("-published_at")
+        return Article.objects.filter(pub_date__isnull=False).order_by("-pub_date")
 
     def lastmod(self, obj: Article):
         return obj.pk
