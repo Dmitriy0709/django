@@ -7,6 +7,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 from django.conf.urls.i18n import i18n_patterns
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import sitemaps
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -39,6 +41,10 @@ urlpatterns += i18n_patterns(
     path('shop/', include('shopapp.urls')),
     path('accounts/', include('myauth.urls')),
     path('blog/', include('blogapp.urls')),
+    path("sitemap.xml", sitemap,
+         {"sitemaps": sitemaps},
+         name="django.contrib.sitemaps.views.sitemap",
+         ),
     path('', TemplateView.as_view(template_name='myauth/index.html'), name='index'),
 )
 
