@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
@@ -8,6 +9,10 @@ def product_preview_directory_path(instance: "Product", filename: str) -> str:
         pk=instance.pk,
         filename=filename,
     )
+
+def get_absolute_url(self):
+    """Возвращает URL для просмотра товара"""
+    return reverse('shopapp:product-detail', kwargs={'pk': self.pk})
 
 class Product(models.Model):
     """
