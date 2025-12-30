@@ -1,0 +1,38 @@
+[
+  {
+    "title": "New Laptop Order",
+    "description": "Customer wants high performance laptop",
+    "user_id": 1,
+    "product_ids": [1, 2]
+  },
+  {
+    "title": "Office Supplies",
+    "description": "Bulk order for office",
+    "user_id": 2,
+    "product_ids": [3, 4, 5]
+  },
+  {
+    "title": "Gift Package",
+    "description": "Birthday gift set",
+    "user_id": 1,
+    "product_ids": [2, 5]
+  },
+  {
+    "title": "Monthly Supplies",
+    "description": "Regular monthly order",
+    "user_id": 3,
+    "product_ids": [1, 3, 4]
+  },
+  {
+    "title": "Weekend Shopping",
+    "description": "Quick weekend purchase",
+    "user_id": 2,
+    "product_ids": [1, 4]
+  },
+  {
+    "title": "Seasonal Order",
+    "description": "Holiday gift orders",
+    "user_id": 1,
+    "product_ids": [2, 3, 5]
+  }
+]

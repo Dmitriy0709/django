@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<orders>
+  <order>
+    <title>New Laptop Order</title>
+    <description>Customer wants high performance laptop</description>
+    <user_id>1</user_id>
+    <product_ids>1,2</product_ids>
+  </order>
+  <order>
+    <title>Office Supplies</title>
+    <description>Bulk order for office</description>
+    <user_id>2</user_id>
+    <product_ids>3,4,5</product_ids>
+  </order>
+  <order>
+    <title>Gift Package</title>
+    <description>Birthday gift set</description>
+    <user_id>1</user_id>
+    <product_ids>2,5</product_ids>
+  </order>
+  <order>
+    <title>Monthly Supplies</title>
+    <description>Regular monthly order</description>
+    <user_id>3</user_id>
+    <product_ids>1,3,4</product_ids>
+  </order>
+  <order>
+    <title>Weekend Shopping</title>
+    <description>Quick weekend purchase</description>
+    <user_id>2</user_id>
+    <product_ids>1,4</product_ids>
+  </order>
+  <order>
+    <title>Seasonal Order</title>
+    <description>Holiday gift orders</description>
+    <user_id>1</user_id>
+    <product_ids>2,3,5</product_ids>
+  </order>
+</orders>
