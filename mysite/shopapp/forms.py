@@ -1,30 +1,11 @@
 from django import forms
-from .models import Product
-
-
-class ProductForm(forms.ModelForm):
-    """
-    Форма для создания и редактирования продуктов.
-    """
-    class Meta:
-        model = Product
-        fields = ('name', 'description', 'price')
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-        }
-
-
-class CSVImportForm(forms.Form):
-    csv_file = forms.FileField()
 
 
 class OrderCSVImportForm(forms.Form):
-    """Форма для импорта заказов из файла"""
+    """Форма для импорта заказов из CSV/JSON/XML файла"""
     csv_file = forms.FileField(
-        label='Select CSV/JSON/XML file',
-        help_text='Supported formats: CSV, JSON, XML',
+        label='Select file',
+        help_text='Upload CSV, JSON, or XML file',
         widget=forms.FileInput(attrs={
             'accept': '.csv,.json,.xml',
             'class': 'form-control'
@@ -32,16 +13,20 @@ class OrderCSVImportForm(forms.Form):
     )
 
     def clean_csv_file(self):
-        """Проверка расширения файла"""
-        file = self.cleaned_data['csv_file']
+        """Валидация формата файла"""
+        csv_file = self.cleaned_data['csv_file']
 
-        # Проверяем расширение
-        valid_extensions = ['.csv', '.json', '.xml']
-        file_extension = file.name.split('.')[-1].lower()
+        # Проверка расширения файла
+        allowed_extensions = ['csv', 'json', 'xml']
+        file_extension = csv_file.name.split('.')[-1].lower()
 
-        if f'.{file_extension}' not in valid_extensions:
+        if file_extension not in allowed_extensions:
             raise forms.ValidationError(
-                f'Invalid file type. Allowed types: {", ".join(valid_extensions)}'
+                f'Invalid file format. Allowed formats: {", ".join(allowed_extensions)}'
             )
 
-        return file
+        # Проверка размера файла (максимум 5 МБ)
+        if csv_file.size > 5 * 1024 * 1024:
+            raise forms.ValidationError('File size must not exceed 5 MB')
+
+        return csv_file

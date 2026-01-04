@@ -10,9 +10,6 @@ def product_preview_directory_path(instance: "Product", filename: str) -> str:
         filename=filename,
     )
 
-def get_absolute_url(self):
-    """Возвращает URL для просмотра товара"""
-    return reverse('shopapp:product-detail', kwargs={'pk': self.pk})
 
 class Product(models.Model):
     """
@@ -47,6 +44,10 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        """Возвращает URL для просмотра товара"""
+        return reverse('shopapp:product-detail', kwargs={'pk': self.pk})
 
     def can_edit(self, user):
         """
@@ -126,3 +127,7 @@ class Order(models.Model):
         Рассчитывает общую стоимость заказа.
         """
         return sum(product.price for product in self.products.all())
+
+    def get_absolute_url(self):
+        """Возвращает URL для просмотра заказа"""
+        return reverse('shopapp:order-detail', kwargs={'pk': self.pk})
