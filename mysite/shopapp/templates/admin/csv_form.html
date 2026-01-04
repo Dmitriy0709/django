@@ -1,18 +1,77 @@
-{% extends 'admin/base.html' %}
-{% load i18n %}
+{% extends "admin/base_site.html" %}
+{% load static %}
 
-{% block title %}Import CSV{% endblock %}
+{% block title %}Import Orders{% endblock %}
 
 {% block content %}
-<h1>Import Products from CSV</h1>
-
-<div>
-    <form action="." method="post" enctype="multipart/form-data">
+<div id="content-main">
+    <h1>Import Orders from File</h1>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h2 style="margin-top: 0;">Supported File Formats</h2>
+        
+        <h3>📊 CSV Format</h3>
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">user_id,delivery_address,promocode,status,product_ids
+1,123 Main Street New York,SUMMER2024,pending,1,2,3
+2,456 Oak Avenue Los Angeles,WELCOME10,processing,2,4</pre>
+        
+        <h3>📄 JSON Format</h3>
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">[
+  {
+    "user_id": 1,
+    "delivery_address": "123 Main Street New York",
+    "promocode": "SUMMER2024",
+    "status": "pending",
+    "product_ids": [1, 2, 3]
+  }
+]</pre>
+        
+        <h3>🗂️ XML Format</h3>
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;orders&gt;
+  &lt;order&gt;
+    &lt;user_id&gt;1&lt;/user_id&gt;
+    &lt;delivery_address&gt;123 Main Street New York&lt;/delivery_address&gt;
+    &lt;product_ids&gt;1,2,3&lt;/product_ids&gt;
+  &lt;/order&gt;
+&lt;/orders&gt;</pre>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
         {% csrf_token %}
-        {{ form.as_p }}
-        <div class="submit-row">
-            <input type="submit" value="Upload CSV">
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.csv_file.id_for_label }}" style="display: block; margin-bottom: 10px; font-weight: bold;">
+                Select File (CSV, JSON, or XML):
+            </label>
+            {{ form.csv_file }}
+            {% if form.csv_file.errors %}
+                <ul style="color: red; margin-top: 5px;">
+                    {% for error in form.csv_file.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="button default" style="cursor: pointer;">
+                Import Orders
+            </button>
+            <a href="{% url 'admin:shopapp_order_changelist' %}" class="button" style="text-decoration: none; line-height: 1.5;">
+                Cancel
+            </a>
         </div>
     </form>
+    
+    {% if messages %}
+        <ul class="messagelist">
+            {% for message in messages %}
+                <li class="{% if message.tags %}{{ message.tags }}{% endif %}" style="margin-top: 20px;">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
 {% endblock %}
