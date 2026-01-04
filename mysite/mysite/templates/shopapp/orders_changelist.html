@@ -11,12 +11,12 @@
     <div style="margin: 20px 0; padding: 15px; background: #e8f4f8; border-radius: 5px; border-left: 4px solid #417690;">
         <h3 style="margin-top: 0;">Quick Actions</h3>
         <p style="margin: 0;">
-            <a href="{% url 'admin:shopapp_order_import_csv' %}" class="button" style="background-color: #417690; padding: 8px 16px; text-decoration: none; color: white; border-radius: 3px; display: inline-block;">
+            <a href="{% url 'admin:shopapp_order_import_csv' %}" class="button" style="background-color: #417690; padding: 8px 16px; text-decoration: none; color: white; border-radius: 3px; display: inline-block; cursor: pointer;">
                 📥 Import Orders from File
             </a>
         </p>
         <small style="color: #666; margin-top: 10px; display: block;">
-            Import orders from CSV, JSON, or XML file. Supported fields: title, description, user_id, product_ids
+            Import orders from CSV, JSON, or XML file. Supported fields: user_id, delivery_address, promocode, status, product_ids
         </small>
     </div>
 {% endblock %}

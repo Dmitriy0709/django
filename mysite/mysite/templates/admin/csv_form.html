@@ -11,33 +11,27 @@
         <h2 style="margin-top: 0;">Supported File Formats</h2>
         
         <h3>📊 CSV Format</h3>
-        <pre style="background: white; padding: 10px; border-left: 4px solid #417690;">title,description,user_id,product_ids
-Order 1,First order,1,1,2,3
-Order 2,Second order,2,2,3</pre>
-        
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">user_id,delivery_address,promocode,status,product_ids
+1,123 Main Street New York,SUMMER2024,pending,1,2,3
+2,456 Oak Avenue Los Angeles,WELCOME10,processing,2,4</pre>
+
         <h3>📄 JSON Format</h3>
-        <pre style="background: white; padding: 10px; border-left: 4px solid #417690;">[
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">[
   {
-    "title": "Order 1",
-    "description": "First order",
     "user_id": 1,
+    "delivery_address": "123 Main Street New York",
+    "promocode": "SUMMER2024",
+    "status": "pending",
     "product_ids": [1, 2, 3]
-  },
-  {
-    "title": "Order 2",
-    "description": "Second order",
-    "user_id": 2,
-    "product_ids": [2, 3]
   }
 ]</pre>
-        
+
         <h3>🗂️ XML Format</h3>
-        <pre style="background: white; padding: 10px; border-left: 4px solid #417690;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <pre style="background: white; padding: 10px; border-left: 4px solid #417690; overflow-x: auto;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;orders&gt;
   &lt;order&gt;
-    &lt;title&gt;Order 1&lt;/title&gt;
-    &lt;description&gt;First order&lt;/description&gt;
     &lt;user_id&gt;1&lt;/user_id&gt;
+    &lt;delivery_address&gt;123 Main Street New York&lt;/delivery_address&gt;
     &lt;product_ids&gt;1,2,3&lt;/product_ids&gt;
   &lt;/order&gt;
 &lt;/orders&gt;</pre>
