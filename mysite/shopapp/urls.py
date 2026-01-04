@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import ProductViewSet, OrderViewSet
+from .views import ProductViewSet, OrderViewSet, UserOrdersListView, UserOrdersExportView
 
 app_name = 'shopapp'
 
@@ -26,4 +26,6 @@ urlpatterns = [
     path('orders/', views.OrderListView.as_view(), name='order_list'),
     path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
     path('orders/export/', views.OrdersExportView.as_view(), name='orders-export'),
+    path('users/<int:user_id>/orders/', UserOrdersListView.as_view(), name='user_orders_list'),
+    path('users/<int:user_id>/orders/export/', UserOrdersExportView(), name='user_orders_export'),
 ]

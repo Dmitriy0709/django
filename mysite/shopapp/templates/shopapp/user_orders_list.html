@@ -1,0 +1,395 @@
+{% load cache %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказы пользователя</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-info h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .user-detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-detail-item label {
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-detail-item span {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .orders-header h3 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .export-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .export-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-orders p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .no-orders small {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.processing {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status.shipped {
+            background: #e7d4f5;
+            color: #6c0399;
+        }
+
+        .status.delivered {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .products {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .product-item {
+            background: #f9f9f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            text-decoration: none;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination .current {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .cache-notice {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #084298;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="header">
+            <h1>📦 Заказы пользователя</h1>
+            <p>История всех заказов</p>
+        </div>
+
+        <!-- Информация о пользователе (БЕЗ КЕША) -->
+        <div class="user-info">
+            <h2>👤 Информация о пользователе</h2>
+            <div class="user-details">
+                <div class="user-detail-item">
+                    <label>Имя пользователя</label>
+                    <span>{{ owner.username }}</span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Email</label>
+                    <span>{{ owner.email }}</span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Имя</label>
+                    <span>{{ owner.first_name }} {{ owner.last_name }}</span>
+                </div>
+                <div class="user-detail-item">
+                    <label>Дата регистрации</label>
+                    <span>{{ owner.date_joined|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список заказов (С КЕШЕМ на 5 минут) -->
+        <div class="content">
+            {% cache 300 user_orders_list owner.pk %}
+                <div class="orders-header">
+                    <h3>📋 Заказы пользователя</h3>
+                    <a href="{% url 'shopapp:user_orders_export' owner.id %}" class="export-btn">
+                        📥 Экспортировать JSON
+                    </a>
+                </div>
+
+                {% if orders %}
+                    <div class="cache-notice">
+                        ⚡ Эта часть кеширована на 5 минут (300 секунд)
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID заказа</th>
+                                <th>Адрес доставки</th>
+                                <th>Статус</th>
+                                <th>Товары</th>
+                                <th>Сумма</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>
+                                        <span class="order-id">#{{ order.pk }}</span>
+                                    </td>
+                                    <td>{{ order.delivery_address }}</td>
+                                    <td>
+                                        <span class="status {{ order.status }}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="products">
+                                            {% for product in order.products.all %}
+                                                <div class="product-item">
+                                                    {{ product.name }}
+                                                </div>
+                                            {% empty %}
+                                                <span style="color: #ccc;">Нет товаров</span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="price">
+                                            {% if order.get_total_price %}
+                                                {{ order.get_total_price }} ₽
+                                            {% else %}
+                                                0 ₽
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Пагинация -->
+                    {% if is_paginated %}
+                        <div class="pagination">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1">« Первая</a>
+                                <a href="?page={{ page_obj.previous_page_number }}">‹ Предыдущая</a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="current">{{ num }}</span>
+                                {% else %}
+                                    <a href="?page={{ num }}">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">Следующая ›</a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}">Последняя »</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="no-orders">
+                        <p>📭 У пользователя <strong>{{ owner.username }}</strong> ещё нет заказов</p>
+                        <small>Заказы будут отображены здесь после их создания</small>
+                    </div>
+                {% endif %}
+            {% endcache %}
+        </div>
+    </div>
+</body>
+</html>
