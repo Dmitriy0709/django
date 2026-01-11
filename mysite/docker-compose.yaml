@@ -1,28 +1,9 @@
-# docker-compose.yml
-
 version: '3.9'
 
 services:
-  app:
-    build:
-      dockerfile: ./Dockerfile
-    command:
-      - gunicorn
-      - mysite.wsgi:application
-      - --bind
-      - "0.0.0.0:8000"
-    ports:
-      - "8000:8000"
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    volumes:
-      - ./mysite/database:/app/database
-  env_file:
-    - .env
+  # ════════════════════════════════════════════════════════════════
+  # 🗄️ DATABASE (PostgreSQL)
+  # ════════════════════════════════════════════════════════════════
   db:
     image: postgres:16-alpine
     container_name: mysite_db
@@ -42,45 +23,47 @@ services:
     networks:
       - mysite-network
 
+  # ════════════════════════════════════════════════════════════════
+  # 🌐 WEB APP (Django + Gunicorn) - PRODUCTION
+  # ════════════════════════════════════════════════════════════════
   web:
     build:
-      context: ../
-      dockerfile: mysite/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: mysite_web
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             gunicorn mysite.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/app
+      - ./mysite/database:/app/database
+      - ./mysite/logs:/app/logs
+      - ./mysite/uploads:/app/uploads
     ports:
       - "8000:8000"
-    # Loki логирование отключено
-    # logging:
-    #   driver: loki
-    #   options:
-    #     loki-url: "http://loki:3100/loki/api/v1/push"
-    #     loki-batch-size: "400"
-    #     loki-batch-timeout: "20s"
-    #     loki-retries: "5"
-    #     loki-max-retries: "20"
-    #     labels: "service=django,app=mysite"
+    env_file:
+      - .env                           # ← ВСЕ переменные из .env файла
     environment:
-      DEBUG: "True"
-      ALLOWED_HOSTS: "localhost,127.0.0.1,web"
-      DATABASES_HOST: db
-      DATABASES_PORT: 5432
+      DATABASES_HOST: db              # ← Override для Docker
+      DATABASES_PORT: "5432"
       DATABASES_NAME: django_db
       DATABASES_USER: postgres
       DATABASES_PASSWORD: postgres
+      DJANGO_DEBUG: "0"               # ← Production mode
     depends_on:
       db:
         condition: service_healthy
-      # Loki зависимость отключена
-      # loki:
-      #   condition: service_started
     networks:
       - mysite-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
 
+  # ════════════════════════════════════════════════════════════════
+  # 📊 GRAFANA (мониторинг)
+  # ════════════════════════════════════════════════════════════════
   grafana:
     image: grafana/grafana:10.2.0
     container_name: mysite_grafana
@@ -94,29 +77,15 @@ services:
     volumes:
       - grafana_storage:/var/lib/grafana
       - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
-    # Loki зависимость отключена
-    # depends_on:
-    #   - loki
     networks:
       - mysite-network
-
-  # Сервис Loki отключен
-  # loki:
-  #   image: grafana/loki:2.9.3
-  #   container_name: mysite_loki
-  #   ports:
-  #     - "3100:3100"
-  #   volumes:
-  #     - loki_storage:/loki
-  #     - ./loki-config.yaml:/etc/loki/local-config.yaml
-  #   command: -config.file=/etc/loki/local-config.yaml
-  #   networks:
-  #     - mysite-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+    driver: local
   grafana_storage:
-  # loki_storage:
+    driver: local
 
 networks:
   mysite-network:

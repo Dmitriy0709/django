@@ -6,27 +6,34 @@ ENV PYTHONPATH=/app
 
 WORKDIR /app
 
-# Install system dependencies
+# Установка системных зависимостей
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies FIRST (before copying app code)
-# This allows Docker to cache the layer if requirements haven't changed
+# ВАЖНО: Копируем requirements.txt ПЕРВЫМ для кеширования слоя
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY mysite /app/
+# Копируем код приложения
+# ИСПРАВЛЕНО: Копируем весь проект, а не только mysite/
+COPY . /app/
 
-# Create logs directory
-RUN mkdir -p /app/logs
+# Создаем необходимые директории
+RUN mkdir -p /app/logs \
+    && mkdir -p /app/staticfiles \
+    && mkdir -p /app/uploads
+
+# Создаем непривилегированного пользователя для безопасности
+RUN useradd -m -u 1000 django && chown -R django:django /app
+USER django
 
 EXPOSE 8000
 
-# Health check
+# Healthcheck для проверки работоспособности
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000')"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000').read()"
 
-CMD ["gunicorn", "mysite.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Запуск через gunicorn
+CMD ["gunicorn", "mysite.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
