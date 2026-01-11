@@ -38,12 +38,15 @@ DATABASE_DIR.mkdir(exist_ok=True)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qso%yq77se8&l8h4!m15noq9d@c(z!bbr9uc#%&4u@8+a$f(b5'
+SECRET_KEY = getenv(
+    "DJANGO_SECRET_KEY",
+    'django-insecure-qso%yq77se8&l8h4!m15noq9d@c(z!bbr9uc#%&4u@8+a$f(b5'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getenv("DJANGO_DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] + getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
