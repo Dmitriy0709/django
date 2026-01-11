@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+from os import getenv
 from pathlib import Path
+import logging.config
 
 import django.middleware.cache
 from django.conf.global_settings import CACHES, CACHE_MIDDLEWARE_SECONDS
@@ -320,3 +322,29 @@ INTERNAL_IPS = [
     '172.17.0.1',      # Docker host gateway
     '172.18.0.1',      # Docker compose network gateway
 ]
+
+LOGLEVEL = getenv("DJANGO_LOGLEVEL", "info").upper()
+
+logging.config.dictConfig({
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "%(asctime)s %(levelname)s [%(name)s:%(linano)s] %(module)s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
+    },
+    "loggers": {
+        "": {
+            "level": LOGLEVEL,
+            "handlers": [
+                "console",
+            ],
+        },
+    },
+})
