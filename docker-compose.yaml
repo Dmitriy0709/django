@@ -1,117 +1,82 @@
+# Файл: ./docker-compose.yaml
 version: '3.9'
 
 services:
-  # ════════════════════════════════════════════════════════════════
-  # 🗄️ DATABASE (PostgreSQL 16)
-  # ════════════════════════════════════════════════════════════════
   db:
     image: postgres:16-alpine
     container_name: mysite_db
-    restart: unless-stopped
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-django_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: your-secure-password-change-this
+      POSTGRES_DB: django_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U django_user"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
     networks:
       - mysite-network
 
-  # ════════════════════════════════════════════════════════════════
-  # 🌐 WEB APP (Django + Gunicorn)
-  # ════════════════════════════════════════════════════════════════
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: .                    # ✅ ИСПРАВЛЕНО: относительный путь
+      dockerfile: Dockerfile        # ✅ Dockerfile в корне
     container_name: mysite_web
-    restart: unless-stopped
-
-    # Выполним миграции перед запуском приложения
     command: >
       sh -c "python mysite/manage.py migrate &&
              python mysite/manage.py collectstatic --noinput &&
-             gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
-
-    volumes:
-      # Для логов
-      - ./mysite/logs:/app/mysite/logs
-      # Для загруженных файлов
-      - ./mysite/uploads:/app/mysite/uploads
-      # Для статических файлов (опционально)
-      - ./mysite/staticfiles:/app/mysite/staticfiles
-
+             gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-your-secret-key-here}
+      DJANGO_DEBUG: '0'
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,example.com
+      DATABASES_HOST: db
+      DATABASES_NAME: django_db
+      DATABASES_USER: django_user
+      DATABASES_PASSWORD: your-secure-password-change-this
+      DATABASES_PORT: '5432'
+      DJANGO_LOGLEVEL: info
     ports:
       - "8000:8000"
-
-    # Загруженные переменные окружения из файла
-    env_file:
-      - .env
-
-    # Переопределение переменных окружения для Docker
-    environment:
-      DJANGO_DEBUG: "0"
-      DATABASES_HOST: db
-      DATABASES_PORT: "5432"
-      DATABASES_NAME: ${POSTGRES_DB:-django_db}
-      DATABASES_USER: ${POSTGRES_USER:-postgres}
-      DATABASES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
+    volumes:
+      - ./mysite/logs:/app/mysite/logs
+      - ./mysite/uploads:/app/mysite/uploads
+      - ./mysite/staticfiles:/app/mysite/staticfiles
     depends_on:
       db:
         condition: service_healthy
-
+    restart: unless-stopped
     networks:
       - mysite-network
 
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-
-  # ════════════════════════════════════════════════════════════════
-  # 📊 GRAFANA (мониторинг) - опционально
-  # ════════════════════════════════════════════════════════════════
   grafana:
     image: grafana/grafana:11.0.0
     container_name: mysite_grafana
-    restart: unless-stopped
     environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=http://localhost:3000
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SERVER_ROOT_URL: http://localhost:3000
     ports:
       - "3000:3000"
     volumes:
-      - grafana_storage:/var/lib/grafana
       - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - grafana_storage:/var/lib/grafana
     depends_on:
       - db
+    restart: unless-stopped
     networks:
       - mysite-network
 
-# ════════════════════════════════════════════════════════════════
-# Volumes для persisted данных
-# ════════════════════════════════════════════════════════════════
 volumes:
   postgres_data:
-    driver: local
   grafana_storage:
-    driver: local
 
-# ════════════════════════════════════════════════════════════════
-# Networks
-# ════════════════════════════════════════════════════════════════
 networks:
   mysite-network:
     driver: bridge
