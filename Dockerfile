@@ -11,7 +11,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Команда для запуска
-CMD ["sh", "-c", "\
-    python mysite/manage.py migrate && \
-    python mysite/manage.py collectstatic --noinput && \
-    gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"]
+CMD ["gunicorn", "mysite.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
+
