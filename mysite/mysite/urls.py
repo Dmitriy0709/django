@@ -10,7 +10,6 @@ from shopapp.sitemaps import ShopSitemap
 from shopapp.feeds import LatestProductsFeed
 from django.views.generic import TemplateView
 from django.conf.urls.i18n import i18n_patterns
-from django.contrib.sitemaps.views import sitemap
 from .sitemaps import sitemaps
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -23,19 +22,12 @@ sitemaps = {
     'shop': ShopSitemap,
 }
 
-# URL без интернационализации (документация API)
+# URL без интернационализации
 urlpatterns = [
     path('req/', include('requestdataapp.urls')),
-    path('admin/', admin.site.urls),
-    path('', include('shopapp.urls', namespace='shopapp')),
-
-    # Sitemap для SEO
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-
-    # RSS Feed
     path('products/latest/feed/', LatestProductsFeed(), name='latest-products-feed'),
 ]
-
 
 # API Schema and Documentation
 urlpatterns += [
