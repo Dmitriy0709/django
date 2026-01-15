@@ -27,10 +27,7 @@ services:
       context: .                    # ✅ ИСПРАВЛЕНО: относительный путь
       dockerfile: Dockerfile        # ✅ Dockerfile в корне
     container_name: mysite_web
-    command: >
-      sh -c "python mysite/manage.py migrate &&
-             python mysite/manage.py collectstatic --noinput &&
-             gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    command: gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-your-secret-key-here}
       DJANGO_DEBUG: '0'
