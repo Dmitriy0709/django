@@ -2,8 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+#COPY requirements.txt .
+RUN pip install --upgrade pip poetry
+RUN poetry config virtualenvs.create false --local
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN poetry install
+
+COPY pyproject.toml poetry.lock ./
 
 COPY . .
 
