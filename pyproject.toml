@@ -1,16 +1,21 @@
-[project]
-name = "django"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "Dmitriy0709",email = "opt-alko1@mail.ru"}
-]
-requires-python = ">=3.12"
-dependencies = [
-    "django-rest-framework (>=0.1.0,<0.2.0)"
-]
+[tool.poetry]
+name = "mysite"
+version = "1.0.0"
+description = "Django интернет-магазин"
+authors = ["Dmitriy0709 <opt-alko1@mail.ru>"]
 
+[tool.poetry.dependencies]
+python = "^3.11"
+Django = "^5.2"
+djangorestframework = "^3.15"
+django-filter = "^25.2"
+django-debug-toolbar = "^6.1"
+Pillow = "^12.1"
+psycopg2-binary = "^2.9"
+gunicorn = "^23.0"
+drf-spectacular = "^0.29"
+sentry-sdk = "^2.48"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
