@@ -7,7 +7,8 @@ RUN pip install --no-cache-dir --upgrade pip poetry && \ poetry config virtualen
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-COPY ..
+COPY . .
+
 
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
